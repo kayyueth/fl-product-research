@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Federated Learning Systems — Flower vs NVFlare vs FLock</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --flower:#E91E63;
+    --nvflare:#00B8A9;
+    --flock:#6C5CE7;
+    --bg:#0B1020;
+    --panel:#141A2E;
+    --panel2:#1B2340;
+    --text:#E9ECF5;
+    --muted:#9AA3BE;
+    --line:#2A3352;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  header{padding:48px 32px 24px;text-align:center;background:radial-gradient(ellipse at top,#1B2340 0%,#0B1020 70%)}
+  header h1{font-size:38px;margin:0 0 8px;letter-spacing:-0.5px}
+  header .sub{color:var(--muted);font-size:16px;max-width:760px;margin:0 auto}
+  .tabs{display:flex;justify-content:center;gap:8px;margin:24px 0 0;flex-wrap:wrap}
+  .tab{padding:10px 18px;border-radius:999px;background:var(--panel);color:var(--text);cursor:pointer;border:1px solid var(--line);font-size:14px;transition:all .2s}
+  .tab:hover{background:var(--panel2)}
+  .tab.active{background:linear-gradient(90deg,var(--flower),var(--flock));border-color:transparent;font-weight:600}
+  main{max-width:1200px;margin:0 auto;padding:32px 20px 80px}
+  section{display:none;animation:fade .35s ease}
+  section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2{font-size:24px;margin:0 0 6px}
+  .section-sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:900px){.grid-3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative;overflow:hidden}
+  .card .accent{position:absolute;top:0;left:0;right:0;height:4px}
+  .flower .accent{background:var(--flower)}
+  .nvflare .accent{background:var(--nvflare)}
+  .flock .accent{background:var(--flock)}
+  .card h3{margin:0 0 6px;font-size:20px}
+  .card .tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;margin-bottom:12px;font-weight:600;letter-spacing:.3px}
+  .flower .tag{background:rgba(233,30,99,.15);color:var(--flower)}
+  .nvflare .tag{background:rgba(0,184,169,.15);color:var(--nvflare)}
+  .flock .tag{background:rgba(108,92,231,.15);color:var(--flock)}
+  .card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 12px}
+  .card ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13.5px;line-height:1.6}
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px}
+  .chart-wrap h3{margin:0 0 16px;font-size:17px}
+  canvas{max-height:380px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:14px;overflow:hidden;border:1px solid var(--line);font-size:13.5px}
+  th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;width:22%}
+  .legend{display:flex;gap:18px;justify-content:center;margin:10px 0 18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .dot.flower{background:var(--flower)}
+  .dot.nvflare{background:var(--nvflare)}
+  .dot.flock{background:var(--flock)}
+  /* Architecture diagram */
+  .arch{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+  .stack{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .stack h4{margin:0 0 12px;font-size:15px;text-align:center}
+  .layer{padding:10px 12px;border-radius:8px;margin-bottom:6px;font-size:12px;text-align:center;border:1px solid var(--line);background:var(--panel2)}
+  .layer.hl-flower{border-color:var(--flower);color:#fff;background:rgba(233,30,99,.18)}
+  .layer.hl-nvflare{border-color:var(--nvflare);color:#fff;background:rgba(0,184,169,.18)}
+  .layer.hl-flock{border-color:var(--flock);color:#fff;background:rgba(108,92,231,.18)}
+  .arrow{text-align:center;color:var(--muted);font-size:14px;margin:2px 0}
+  .spectrum{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px}
+  .spectrum h3{margin:0 0 18px;font-size:17px}
+  .bar{position:relative;height:58px;margin:14px 0 28px}
+  .track{position:absolute;top:26px;left:0;right:0;height:6px;background:var(--line);border-radius:3px}
+  .track .fill{position:absolute;top:0;left:0;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--flower),var(--nvflare),var(--flock))}
+  .pin{position:absolute;top:10px;transform:translateX(-50%);text-align:center;font-size:11px;font-weight:600}
+  .pin .marker{width:14px;height:14px;border-radius:50%;margin:0 auto 4px;border:3px solid #0B1020}
+  .ends{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:8px}
+  .positioning{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  @media(max-width:900px){.positioning{grid-template-columns:1fr}.arch{grid-template-columns:1fr}}
+  .pos{padding:20px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+  .pos.flower{border-top:4px solid var(--flower)}
+  .pos.nvflare{border-top:4px solid var(--nvflare)}
+  .pos.flock{border-top:4px solid var(--flock)}
+  .pos b{display:block;margin-bottom:8px;font-size:15px}
+  .pos p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Federated Learning Systems — A BD View</h1>
+  <p class="sub">Interactive comparison of <b style="color:var(--flower)">Flower</b>, <b style="color:var(--nvflare)">NVFlare</b>, and <b style="color:var(--flock)">FLock</b> — paradigm, tradeoffs, and when to pick each.</p>
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="radar">Tradeoff Radar</div>
+    <div class="tab" data-tab="spectrum">Efficiency vs Trust</div>
+    <div class="tab" data-tab="arch">Architecture</div>
+    <div class="tab" data-tab="fit">Customer Fit</div>
+    <div class="tab" data-tab="table">Full Comparison</div>
+  </div>
+</header>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="overview" class="active">
+  <h2>Three systems, three paradigms</h2>
+  <p class="section-sub">Each system is solving a fundamentally different problem. Same category, different buyer.</p>
+  <div class="grid-3">
+    <div class="card flower"><div class="accent"></div>
+      <span class="tag">COORDINATION SYSTEM</span>
+      <h3>Flower</h3>
+      <p>Dev-first FL framework. Make federated learning as easy as writing a normal ML script.</p>
+      <ul>
+        <li><b>Optimizes for:</b> flexibility &amp; iteration</li>
+        <li><b>Trust:</b> assumed honest</li>
+        <li><b>Users:</b> ML teams, researchers</li>
+      </ul>
+    </div>
+    <div class="card nvflare"><div class="accent"></div>
+      <span class="tag">ORCHESTRATION SYSTEM</span>
+      <h3>NVFlare</h3>
+      <p>Enterprise workflow engine for FL. Controlled, auditable, reproducible jobs across trusted institutions.</p>
+      <ul>
+        <li><b>Optimizes for:</b> stability &amp; governance</li>
+        <li><b>Trust:</b> institutionally enforced</li>
+        <li><b>Users:</b> enterprises, hospitals, banks</li>
+      </ul>
+    </div>
+    <div class="card flock"><div class="accent"></div>
+      <span class="tag">ECONOMIC / INCENTIVE SYSTEM</span>
+      <h3>FLock</h3>
+      <p>Decentralized, trustless FL network. Coordinate parties who don't trust each other via incentives &amp; attestation.</p>
+      <ul>
+        <li><b>Optimizes for:</b> trust &amp; sovereignty</li>
+        <li><b>Trust:</b> trustless / adversarial</li>
+        <li><b>Users:</b> governments, multi-sovereign networks</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="positioning">
+    <div class="pos flower"><b>Flower is for…</b><p>ML teams adding federated learning to an existing stack with minimum friction.</p></div>
+    <div class="pos nvflare"><b>NVFlare is for…</b><p>Enterprises that need a controlled, auditable, production-grade FL orchestration platform.</p></div>
+    <div class="pos flock"><b>FLock is for…</b><p>Governments and multi-party networks that need sovereign, trustless, incentive-aligned AI across parties who don't trust each other.</p></div>
+  </div>
+</section>
+
+<!-- RADAR -->
+<section id="radar">
+  <h2>Tradeoff Radar</h2>
+  <p class="section-sub">Higher = stronger on that dimension. No system wins on all axes — that's the point.</p>
+  <div class="legend">
+    <span><i class="dot flower"></i>Flower</span>
+    <span><i class="dot nvflare"></i>NVFlare</span>
+    <span><i class="dot flock"></i>FLock</span>
+  </div>
+  <div class="chart-wrap"><canvas id="radar"></canvas></div>
+  <div class="chart-wrap">
+    <h3>Relative tradeoffs (high-level)</h3>
+    <canvas id="bars"></canvas>
+  </div>
+</section>
+
+<!-- SPECTRUM -->
+<section id="spectrum">
+  <h2>Efficiency ↔ Trust Spectrum</h2>
+  <p class="section-sub">The core tradeoff: the more trust you add, the more overhead you pay. Pick the point that matches your buyer.</p>
+
+  <div class="spectrum">
+    <h3>Efficiency (lower overhead →)</h3>
+    <div class="bar">
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <div class="pin" style="left:12%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
+      <div class="pin" style="left:52%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
+      <div class="pin" style="left:88%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    </div>
+    <div class="ends"><span>Minimal coordination overhead</span><span>Infra overhead</span><span>Economic overhead</span></div>
+
+    <h3 style="margin-top:28px">Determinism (more predictable →)</h3>
+    <div class="bar">
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <div class="pin" style="left:88%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
+      <div class="pin" style="left:62%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
+      <div class="pin" style="left:18%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    </div>
+    <div class="ends"><span>Game-theoretic behavior</span><span>Coordination-based</span><span>Controlled execution</span></div>
+
+    <h3 style="margin-top:28px">Developer Experience (smoother →)</h3>
+    <div class="bar">
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <div class="pin" style="left:88%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
+      <div class="pin" style="left:52%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
+      <div class="pin" style="left:14%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    </div>
+    <div class="ends"><span>Mechanism-design complexity</span><span>Infra-heavy workflow</span><span>Dev-first abstraction</span></div>
+
+    <h3 style="margin-top:28px">Trust Guarantees (stronger →)</h3>
+    <div class="bar">
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <div class="pin" style="left:14%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
+      <div class="pin" style="left:50%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
+      <div class="pin" style="left:90%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    </div>
+    <div class="ends"><span>Assumed honest</span><span>Institutionally enforced</span><span>Trustless / adversarial</span></div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="arch">
+  <h2>Architecture at a Glance</h2>
+  <p class="section-sub">What each stack actually looks like. Hover the highlighted layer — that's where each system's "gravity" sits.</p>
+  <div class="arch">
+    <div class="stack">
+      <h4 style="color:var(--flower)">Flower</h4>
+      <div class="layer">Application / Model Code</div>
+      <div class="arrow">▲</div>
+      <div class="layer hl-flower">Strategy API (Python, framework-agnostic)</div>
+      <div class="arrow">▲</div>
+      <div class="layer">gRPC Client ↔ Server Messaging</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Local Training Runtime</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Raw Local Data</div>
+    </div>
+
+    <div class="stack">
+      <h4 style="color:var(--nvflare)">NVFlare</h4>
+      <div class="layer">Admin Console / Dashboards</div>
+      <div class="arrow">▲</div>
+      <div class="layer hl-nvflare">Job &amp; Workflow Controller</div>
+      <div class="arrow">▲</div>
+      <div class="layer">PKI, RBAC, Provisioning</div>
+      <div class="arrow">▲</div>
+      <div class="layer">FL Clients (institutional nodes)</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Siloed Institutional Data</div>
+    </div>
+
+    <div class="stack">
+      <h4 style="color:var(--flock)">FLock</h4>
+      <div class="layer">Application / Sovereign AI Models</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Federated Training Layer (SecAgg + DP)</div>
+      <div class="arrow">▲</div>
+      <div class="layer hl-flock">Incentive &amp; Attestation Layer (on-chain)</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Trustless Node Network</div>
+      <div class="arrow">▲</div>
+      <div class="layer">Sovereign / Multi-Party Data</div>
+    </div>
+  </div>
+</section>
+
+<!-- FIT -->
+<section id="fit">
+  <h2>Customer Fit Map</h2>
+  <p class="section-sub">Where each system wins on a buyer map. X: trust between parties (high → low). Y: ops maturity required.</p>
+  <div class="chart-wrap"><canvas id="scatter"></canvas></div>
+  <div class="grid-3" style="margin-top:20px">
+    <div class="card flower"><div class="accent"></div>
+      <h3>Ideal for</h3>
+      <ul><li>FL research &amp; prototyping</li><li>Cross-device FL</li><li>Startups iterating fast</li></ul>
+    </div>
+    <div class="card nvflare"><div class="accent"></div>
+      <h3>Ideal for</h3>
+      <ul><li>Hospital &amp; bank consortia</li><li>Regulated cross-silo FL</li><li>Defense pilots</li></ul>
+    </div>
+    <div class="card flock"><div class="accent"></div>
+      <h3>Ideal for</h3>
+      <ul><li>Multi-sovereign AI</li><li>Smart city / gov networks</li><li>Decentralized AI marketplaces</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- TABLE -->
+<section id="table">
+  <h2>Full Comparison Table</h2>
+  <p class="section-sub">20-dimension BD reference. Click a tab above for visual views.</p>
+  <div style="overflow-x:auto">
+    <table id="compareTable"></table>
+  </div>
+</section>
+
+</main>
+
+<footer>FLock × Internal BD • Interactive Infographic • v1</footer>
+
+<script>
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+// Colors
+const C = {flower:'#E91E63', nvflare:'#00B8A9', flock:'#6C5CE7'};
+const alpha = (hex,a)=>{const n=parseInt(hex.slice(1),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`};
+
+Chart.defaults.color = '#9AA3BE';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, Arial';
+Chart.defaults.borderColor = '#2A3352';
+
+// Radar
+new Chart(document.getElementById('radar'), {
+  type:'radar',
+  data:{
+    labels:['Efficiency','Determinism','Developer Experience','Trust Guarantees','Enterprise Ops','Incentive Alignment','Scalability Across Orgs'],
+    datasets:[
+      {label:'Flower', data:[9,7,9,2,3,1,6], borderColor:C.flower, backgroundColor:alpha(C.flower,.18), pointBackgroundColor:C.flower},
+      {label:'NVFlare',data:[6,9,6,6,9,3,5], borderColor:C.nvflare,backgroundColor:alpha(C.nvflare,.18),pointBackgroundColor:C.nvflare},
+      {label:'FLock',  data:[4,5,4,9,6,9,9], borderColor:C.flock,  backgroundColor:alpha(C.flock,.18),  pointBackgroundColor:C.flock},
+    ]
+  },
+  options:{
+    plugins:{legend:{position:'bottom'}},
+    scales:{r:{min:0,max:10,angleLines:{color:'#2A3352'},grid:{color:'#2A3352'},pointLabels:{color:'#E9ECF5',font:{size:12}},ticks:{display:false}}}
+  }
+});
+
+// Bars
+new Chart(document.getElementById('bars'), {
+  type:'bar',
+  data:{
+    labels:['Efficiency','Determinism','Developer Experience'],
+    datasets:[
+      {label:'Flower', data:[9,7,9], backgroundColor:C.flower},
+      {label:'NVFlare',data:[6,9,6], backgroundColor:C.nvflare},
+      {label:'FLock',  data:[4,5,4], backgroundColor:C.flock},
+    ]
+  },
+  options:{
+    plugins:{legend:{position:'bottom'}},
+    scales:{y:{beginAtZero:true,max:10,grid:{color:'#2A3352'}},x:{grid:{display:false}}}
+  }
+});
+
+// Scatter / fit map
+new Chart(document.getElementById('scatter'),{
+  type:'scatter',
+  data:{datasets:[
+    {label:'Flower', data:[{x:9,y:2}], backgroundColor:C.flower, pointRadius:18, pointHoverRadius:22},
+    {label:'NVFlare',data:[{x:6,y:9}], backgroundColor:C.nvflare,pointRadius:18, pointHoverRadius:22},
+    {label:'FLock',  data:[{x:1.5,y:7}], backgroundColor:C.flock, pointRadius:18, pointHoverRadius:22},
+  ]},
+  options:{
+    plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:(c)=>`${c.dataset.label} — trust:${c.parsed.x}/10, ops:${c.parsed.y}/10`}}},
+    scales:{
+      x:{title:{display:true,text:'Trust between parties (high → low)'},min:0,max:10,reverse:true,grid:{color:'#2A3352'}},
+      y:{title:{display:true,text:'Ops maturity required'},min:0,max:10,grid:{color:'#2A3352'}}
+    }
+  }
+});
+
+// Table
+const rows = [
+  ['System Paradigm','Coordination system','Orchestration system','Economic / incentive system'],
+  ['Core Philosophy','FL as easy as normal ML code','Controlled, auditable jobs across institutions','Trustless, sovereign FL with incentives'],
+  ['Optimization Target','Flexibility & iteration','Stability & governance','Trust & incentive alignment'],
+  ['Architecture Style','Strategy-driven','Workflow/job-driven','Token/incentive-driven'],
+  ['Communication Model','gRPC message-passing','Workflow pipeline','Economic coordination (ledger-mediated)'],
+  ['Trust Model','Assumed honest','Institutionally enforced','Trustless / adversarial'],
+  ['Infra Requirements','Low','High (PKI, console, ops)','Medium–High (+ledger, attestation)'],
+  ['Scalability','Horizontal; bottleneck at aggregation','Within institutional footprint','Across orgs & jurisdictions'],
+  ['Efficiency','Highest — lean runtime','Moderate — infra overhead','Lowest raw — economic overhead'],
+  ['Determinism','High','Highest','Lower (game-theoretic)'],
+  ['Security Model','None built-in beyond TLS','Infra-based (PKI, RBAC, DP/HE)','Crypto-economic (attestation, slashing)'],
+  ['Incentives','None','External (contracts)','Built-in tokenomics'],
+  ['Developer Experience','Best — Pythonic, fast','Moderate — infra-heavy','Steepest — mechanism design'],
+  ['Deployment Maturity','Early–mid production','Enterprise production','Experimental–early production'],
+  ['Typical Users','ML teams, researchers','Enterprises, hospitals, banks','Govs, sovereign networks, Web3 AI'],
+  ['Ideal Use Cases','Prototyping, research, cross-device','Cross-silo FL in regulated consortia','Multi-sovereign, adversarial, incentive-driven'],
+  ['Anti-Use Cases','Adversarial or regulated enterprise','Fast research iteration; trustless nets','Simple trusted internal FL; latency-critical'],
+  ['Strengths','Simple • framework-agnostic • community','Enterprise ops • reproducibility • governance','Trustless • sovereign • built-in incentives'],
+  ['Weaknesses','No security/governance/incentives','Heavy ops • slow iteration','Complex • less mature • overhead'],
+];
+const t = document.getElementById('compareTable');
+t.innerHTML = `<thead><tr><th>Dimension</th><th style="color:${C.flower}">Flower</th><th style="color:${C.nvflare}">NVFlare</th><th style="color:${C.flock}">FLock</th></tr></thead><tbody>${
+  rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')
+}</tbody>`;
+</script>
+</body>
+</html>
