@@ -6,360 +6,1641 @@
 <title>Federated Learning Systems — Flower vs NVFlare vs FLock</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root{
-    --flower:#E91E63;
-    --nvflare:#00B8A9;
-    --flock:#6C5CE7;
-    --bg:#0B1020;
-    --panel:#141A2E;
-    --panel2:#1B2340;
-    --text:#E9ECF5;
-    --muted:#9AA3BE;
-    --line:#2A3352;
+  :root {
+    --flower: #E91E63;
+    --nvflare: #00A896;
+    --flock: #5C6BC0;
+    --flower-light: #FCE4EC;
+    --nvflare-light: #E0F5F3;
+    --flock-light: #EDE7F6;
+    --flower-mid: rgba(233,30,99,.12);
+    --nvflare-mid: rgba(0,168,150,.12);
+    --flock-mid: rgba(92,107,192,.12);
+    --bg: #FFFFFF;
+    --surface: #F8F9FB;
+    --surface2: #EEF0F6;
+    --border: #E2E5EF;
+    --text: #1A1D2E;
+    --muted: #6B7280;
+    --section-gap: 80px;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  header{padding:48px 32px 24px;text-align:center;background:radial-gradient(ellipse at top,#1B2340 0%,#0B1020 70%)}
-  header h1{font-size:38px;margin:0 0 8px;letter-spacing:-0.5px}
-  header .sub{color:var(--muted);font-size:16px;max-width:760px;margin:0 auto}
-  .tabs{display:flex;justify-content:center;gap:8px;margin:24px 0 0;flex-wrap:wrap}
-  .tab{padding:10px 18px;border-radius:999px;background:var(--panel);color:var(--text);cursor:pointer;border:1px solid var(--line);font-size:14px;transition:all .2s}
-  .tab:hover{background:var(--panel2)}
-  .tab.active{background:linear-gradient(90deg,var(--flower),var(--flock));border-color:transparent;font-weight:600}
-  main{max-width:1200px;margin:0 auto;padding:32px 20px 80px}
-  section{display:none;animation:fade .35s ease}
-  section.active{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  h2{font-size:24px;margin:0 0 6px}
-  .section-sub{color:var(--muted);margin:0 0 24px;font-size:14px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-  @media(max-width:900px){.grid-3{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative;overflow:hidden}
-  .card .accent{position:absolute;top:0;left:0;right:0;height:4px}
-  .flower .accent{background:var(--flower)}
-  .nvflare .accent{background:var(--nvflare)}
-  .flock .accent{background:var(--flock)}
-  .card h3{margin:0 0 6px;font-size:20px}
-  .card .tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;margin-bottom:12px;font-weight:600;letter-spacing:.3px}
-  .flower .tag{background:rgba(233,30,99,.15);color:var(--flower)}
-  .nvflare .tag{background:rgba(0,184,169,.15);color:var(--nvflare)}
-  .flock .tag{background:rgba(108,92,231,.15);color:var(--flock)}
-  .card p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 12px}
-  .card ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13.5px;line-height:1.6}
-  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px}
-  .chart-wrap h3{margin:0 0 16px;font-size:17px}
-  canvas{max-height:380px}
-  table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:14px;overflow:hidden;border:1px solid var(--line);font-size:13.5px}
-  th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-  th{background:var(--panel2);font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
-  tr:last-child td{border-bottom:none}
-  td:first-child{font-weight:600;width:22%}
-  .legend{display:flex;gap:18px;justify-content:center;margin:10px 0 18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-  .legend span{display:inline-flex;align-items:center;gap:6px}
-  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-  .dot.flower{background:var(--flower)}
-  .dot.nvflare{background:var(--nvflare)}
-  .dot.flock{background:var(--flock)}
-  /* Architecture diagram */
-  .arch{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
-  .stack{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .stack h4{margin:0 0 12px;font-size:15px;text-align:center}
-  .layer{padding:10px 12px;border-radius:8px;margin-bottom:6px;font-size:12px;text-align:center;border:1px solid var(--line);background:var(--panel2)}
-  .layer.hl-flower{border-color:var(--flower);color:#fff;background:rgba(233,30,99,.18)}
-  .layer.hl-nvflare{border-color:var(--nvflare);color:#fff;background:rgba(0,184,169,.18)}
-  .layer.hl-flock{border-color:var(--flock);color:#fff;background:rgba(108,92,231,.18)}
-  .arrow{text-align:center;color:var(--muted);font-size:14px;margin:2px 0}
-  .spectrum{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:20px}
-  .spectrum h3{margin:0 0 18px;font-size:17px}
-  .bar{position:relative;height:58px;margin:14px 0 28px}
-  .track{position:absolute;top:26px;left:0;right:0;height:6px;background:var(--line);border-radius:3px}
-  .track .fill{position:absolute;top:0;left:0;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--flower),var(--nvflare),var(--flock))}
-  .pin{position:absolute;top:10px;transform:translateX(-50%);text-align:center;font-size:11px;font-weight:600}
-  .pin .marker{width:14px;height:14px;border-radius:50%;margin:0 auto 4px;border:3px solid #0B1020}
-  .ends{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:8px}
-  .positioning{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
-  @media(max-width:900px){.positioning{grid-template-columns:1fr}.arch{grid-template-columns:1fr}}
-  .pos{padding:20px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
-  .pos.flower{border-top:4px solid var(--flower)}
-  .pos.nvflare{border-top:4px solid var(--nvflare)}
-  .pos.flock{border-top:4px solid var(--flock)}
-  .pos b{display:block;margin-bottom:8px;font-size:15px}
-  .pos p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
-  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #0B1020 0%, #1A2040 60%, #0F1830 100%);
+    padding: 72px 32px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(108,92,231,.25) 0%, transparent 70%);
+  }
+  header h1 {
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+  header .sub {
+    color: rgba(255,255,255,.65);
+    font-size: 16px;
+    max-width: 680px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+  header .sub b { color: rgba(255,255,255,.9); }
+  .hero-pills {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .pill {
+    padding: 8px 22px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+  }
+  .pill.flower { background: var(--flower); color: #fff; }
+  .pill.nvflare { background: var(--nvflare); color: #fff; }
+  .pill.flock { background: var(--flock); color: #fff; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 0;
+    justify-content: center;
+  }
+  nav a {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+  nav a:hover { color: var(--text); border-color: var(--border); }
+
+  /* ─── LAYOUT ─── */
+  main { max-width: 1160px; margin: 0 auto; padding: 0 24px 100px; }
+  section { padding-top: var(--section-gap); }
+  .section-header { margin-bottom: 32px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .section-header h2 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 6px; }
+  .section-header p { color: var(--muted); font-size: 14.5px; max-width: 640px; }
+  .divider { height: 1px; background: var(--border); margin: 0 0 var(--section-gap); }
+
+  /* ─── CARDS ─── */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media(max-width: 900px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.08); transform: translateY(-2px); }
+  .card .stripe { position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0; }
+  .card.flower .stripe { background: var(--flower); }
+  .card.nvflare .stripe { background: var(--nvflare); }
+  .card.flock .stripe { background: var(--flock); }
+  .card .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .card.flower .tag { background: var(--flower-light); color: var(--flower); }
+  .card.nvflare .tag { background: var(--nvflare-light); color: var(--nvflare); }
+  .card.flock .tag { background: var(--flock-light); color: var(--flock); }
+  .card h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; letter-spacing: -.3px; }
+  .card p { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 14px; }
+  .card ul { padding-left: 16px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  .card ul li b { color: var(--text); font-weight: 600; }
+
+  /* ─── POSITIONING ROW ─── */
+  .pos-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  @media(max-width: 900px) { .pos-row { grid-template-columns: 1fr; } }
+  .pos {
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: var(--surface);
+    border-left: 3px solid var(--border);
+  }
+  .pos.flower { border-left-color: var(--flower); background: var(--flower-light); }
+  .pos.nvflare { border-left-color: var(--nvflare); background: var(--nvflare-light); }
+  .pos.flock { border-left-color: var(--flock); background: var(--flock-light); }
+  .pos b { display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .pos.flower b { color: var(--flower); }
+  .pos.nvflare b { color: var(--nvflare); }
+  .pos.flock b { color: var(--flock); }
+  .pos p { color: var(--text); font-size: 13px; line-height: 1.55; }
+
+  /* ─── CHART WRAP ─── */
+  .chart-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .chart-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .chart-box .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+  canvas { max-height: 340px; }
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.flower { background: var(--flower); }
+  .dot.nvflare { background: var(--nvflare); }
+  .dot.flock { background: var(--flock); }
+
+  /* ─── SPECTRUM ─── */
+  .spectrum-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+  }
+  .spectrum-row { margin-bottom: 36px; }
+  .spectrum-row:last-child { margin-bottom: 0; }
+  .spectrum-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .spectrum-label .title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .spectrum-label .ends { display: flex; gap: 12px; font-size: 11.5px; color: var(--muted); }
+  .track {
+    position: relative;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .track-fill {
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    border-radius: 4px;
+  }
+  .pins { position: relative; height: 40px; }
+  .pin {
+    position: absolute;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .pin-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  }
+  .pin-label { font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .spectrum-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── ARCHITECTURE ─── */
+  .arch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media(max-width: 900px) { .arch-grid { grid-template-columns: 1fr; } }
+  .stack {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .stack-header {
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 800;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stack-header .badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: .4px;
+  }
+  .stack.flower .stack-header { border-top: 4px solid var(--flower); color: var(--flower); }
+  .stack.nvflare .stack-header { border-top: 4px solid var(--nvflare); color: var(--nvflare); }
+  .stack.flock .stack-header { border-top: 4px solid var(--flock); color: var(--flock); }
+  .stack.flower .badge { background: var(--flower-light); color: var(--flower); }
+  .stack.nvflare .badge { background: var(--nvflare-light); color: var(--nvflare); }
+  .stack.flock .badge { background: var(--flock-light); color: var(--flock); }
+  .layers { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .layer {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .layer.hl {
+    font-weight: 700;
+    color: var(--text);
+    border-width: 2px;
+  }
+  .stack.flower .layer.hl { border-color: var(--flower); background: var(--flower-light); color: var(--flower); }
+  .stack.nvflare .layer.hl { border-color: var(--nvflare); background: var(--nvflare-light); color: var(--nvflare); }
+  .stack.flock .layer.hl { border-color: var(--flock); background: var(--flock-light); color: var(--flock); }
+  .layer-arrow { text-align: center; color: var(--border); font-size: 12px; line-height: 1; }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--surface); }
+  th {
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  th.flower { color: var(--flower); }
+  th.nvflare { color: var(--nvflare); }
+  th.flock { color: var(--flock); }
+  td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: 600; font-size: 13px; color: var(--text); width: 20%; white-space: nowrap; background: var(--surface); }
+  tbody tr:hover td { background: #FAFBFF; }
+  tbody tr:hover td:first-child { background: #F3F4FB; }
+
+  /* ─── SCATTER QUADRANT LABELS ─── */
+  .quadrant-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+  /* ─── ORIGINS ─── */
+  .origins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+  @media(max-width:900px) { .origins-grid { grid-template-columns:1fr; } }
+  .origin-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .origin-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .origin-header .year-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    letter-spacing: .3px;
+  }
+  .origin-card.flower .year-badge { background: var(--flower-light); color: var(--flower); }
+  .origin-card.nvflare .year-badge { background: var(--nvflare-light); color: var(--nvflare); }
+  .origin-header h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .origin-header .origin-tagline { font-size: 13px; color: var(--muted); }
+  .origin-body { padding: 18px 22px; }
+  .origin-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .origin-body p { font-size: 13.5px; color: var(--text); line-height: 1.65; margin-bottom: 16px; }
+  .origin-body p:last-child { margin-bottom: 0; }
+  .dna-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+  .dna-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .origin-card.flower .dna-pill { border-color: var(--flower); background: var(--flower-light); color: var(--flower); }
+  .origin-card.nvflare .dna-pill { border-color: var(--nvflare); background: var(--nvflare-light); color: var(--nvflare); }
+  .implication-box {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 4px;
+  }
+  .implication-box .imp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 6px; }
+  .implication-box ul { padding-left: 16px; font-size: 13px; color: var(--text); line-height: 1.7; }
+  .origin-card.flower .implication-box { border-left: 3px solid var(--flower); }
+  .origin-card.nvflare .implication-box { border-left: 3px solid var(--nvflare); }
+  .flock-born {
+    background: linear-gradient(135deg, #EDE7F6 0%, #E8EAF6 100%);
+    border: 1px solid #C5CAE9;
+    border-radius: 14px;
+    padding: 22px 26px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .flock-born .fb-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--flock);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .flock-born h4 { font-size: 15px; font-weight: 800; color: var(--flock); margin-bottom: 6px; }
+  .flock-born p { font-size: 13px; color: #3D3D5C; line-height: 1.65; margin: 0; }
+
+  /* ─── SWOT ─── */
+  .swot-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+  @media(max-width:900px) { .swot-grid { grid-template-columns:1fr; } }
+  .swot-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .swot-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .swot-card.flower .swot-card-header { background: var(--flower-light); border-top: 4px solid var(--flower); }
+  .swot-card.nvflare .swot-card-header { background: var(--nvflare-light); border-top: 4px solid var(--nvflare); }
+  .swot-card.flock .swot-card-header { background: var(--flock-light); border-top: 4px solid var(--flock); }
+  .swot-card-header h3 { font-size: 17px; font-weight: 800; }
+  .swot-card.flower .swot-card-header h3 { color: var(--flower); }
+  .swot-card.nvflare .swot-card-header h3 { color: var(--nvflare); }
+  .swot-card.flock .swot-card-header h3 { color: var(--flock); }
+  .swot-card-header .swot-sub { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+  .swot-quads { display: grid; grid-template-columns: 1fr 1fr; }
+  .swot-quad { padding: 14px 16px; }
+  .swot-quad:nth-child(1) { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .swot-quad:nth-child(2) { border-bottom: 1px solid var(--border); }
+  .swot-quad:nth-child(3) { border-right: 1px solid var(--border); }
+  .swot-q-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .swot-quad.s .swot-q-label { color: #16A34A; }
+  .swot-quad.w .swot-q-label { color: #DC2626; }
+  .swot-quad.o .swot-q-label { color: #2563EB; }
+  .swot-quad.t .swot-q-label { color: #D97706; }
+  .swot-quad ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+  .swot-quad ul li { font-size: 12px; color: var(--text); line-height: 1.45; padding-left: 14px; position: relative; }
+  .swot-quad ul li::before { content: ''; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; border-radius: 50%; }
+  .swot-quad.s ul li::before { background: #16A34A; }
+  .swot-quad.w ul li::before { background: #DC2626; }
+  .swot-quad.o ul li::before { background: #2563EB; }
+  .swot-quad.t ul li::before { background: #D97706; }
+
+  /* ─── UNDER THE HOOD ─── */
+  .tech-section-bg {
+    background: #F5F6FA;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 24px;
+  }
+  .tech-intro {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  @media(max-width:900px) { .tech-intro { grid-template-columns:1fr; } }
+  .tech-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .tech-card .tc-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .tech-card.flower .tc-label { color: var(--flower); }
+  .tech-card.nvflare .tc-label { color: var(--nvflare); }
+  .tech-card.flock .tc-label { color: var(--flock); }
+  .tech-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+  .tech-kv { display: flex; flex-direction: column; gap: 8px; }
+  .tech-kv .kv { display: flex; flex-direction: column; }
+  .tech-kv .kv .k { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 2px; }
+  .tech-kv .kv .v { font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .tech-kv .kv .v code {
+    font-family: "SF Mono", "Fira Code", Menlo, monospace;
+    font-size: 11.5px;
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--text);
+  }
+
+  /* Round flow */
+  .round-flow { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 24px; }
+  @media(max-width:900px) { .round-flow { grid-template-columns:1fr; } }
+  .flow-col {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .flow-col-header {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-col.flower .flow-col-header { background: var(--flower-light); color: var(--flower); border-top: 3px solid var(--flower); }
+  .flow-col.nvflare .flow-col-header { background: var(--nvflare-light); color: var(--nvflare); border-top: 3px solid var(--nvflare); }
+  .flow-col.flock .flow-col-header { background: var(--flock-light); color: var(--flock); border-top: 3px solid var(--flock); }
+  .flow-steps { padding: 14px 16px; display: flex; flex-direction: column; gap: 0; }
+  .flow-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .flow-col.flower .step-num { background: var(--flower-light); color: var(--flower); }
+  .flow-col.nvflare .step-num { background: var(--nvflare-light); color: var(--nvflare); }
+  .flow-col.flock .step-num { background: var(--flock-light); color: var(--flock); }
+  .step-body .step-title { font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .step-body .step-note { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+  .step-body .step-note code {
+    font-family: "SF Mono", "Fira Code", Menlo, monospace;
+    font-size: 11px;
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* Privacy primitives table */
+  .privacy-table-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .privacy-table-wrap table { font-size: 13px; }
+  .privacy-table-wrap th { background: var(--surface); font-size: 11px; }
+  .badge-yes { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background:#DCFCE7; color:#166534; }
+  .badge-no  { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background:#FEF2F2; color:#991B1B; }
+  .badge-opt { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background:#FEF9C3; color:#854D0E; }
+  .badge-native { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background:#EDE7F6; color:#4527A0; }
+
+  /* Topology diagrams */
+  .topology-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 8px; }
+  @media(max-width:900px) { .topology-row { grid-template-columns:1fr; } }
+  .topo-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .topo-title { font-size: 12px; font-weight: 700; margin-bottom: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .topo-svg { width: 100%; max-width: 180px; height: 130px; display: block; margin: 0 auto 10px; }
+  .topo-caption { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: var(--section-gap);
+    letter-spacing: .3px;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Federated Learning Systems — A BD View</h1>
-  <p class="sub">Interactive comparison of <b style="color:var(--flower)">Flower</b>, <b style="color:var(--nvflare)">NVFlare</b>, and <b style="color:var(--flock)">FLock</b> — paradigm, tradeoffs, and when to pick each.</p>
-  <div class="tabs">
-    <div class="tab active" data-tab="overview">Overview</div>
-    <div class="tab" data-tab="radar">Tradeoff Radar</div>
-    <div class="tab" data-tab="spectrum">Efficiency vs Trust</div>
-    <div class="tab" data-tab="arch">Architecture</div>
-    <div class="tab" data-tab="fit">Customer Fit</div>
-    <div class="tab" data-tab="table">Full Comparison</div>
+  <h1>Federated Learning Systems</h1>
+  <p class="sub">A BD view of <b>Flower</b>, <b>NVFlare</b>, and <b>FLock</b> — paradigm, tradeoffs, and when to pick each.</p>
+  <div class="hero-pills">
+    <div class="pill flower">Flower — Coordination</div>
+    <div class="pill nvflare">NVFlare — Orchestration</div>
+    <div class="pill flock">FLock — Incentive Layer</div>
   </div>
 </header>
 
+<nav>
+  <a href="#overview">Overview</a>
+  <a href="#origins">Origins</a>
+  <a href="#radar">Tradeoffs</a>
+  <a href="#spectrum">Spectrum</a>
+  <a href="#arch">Architecture</a>
+  <a href="#fit">Customer Fit</a>
+  <a href="#table">Comparison</a>
+  <a href="#swot">SWOT</a>
+  <a href="#hood">Under the Hood</a>
+</nav>
+
 <main>
 
-<!-- OVERVIEW -->
-<section id="overview" class="active">
-  <h2>Three systems, three paradigms</h2>
-  <p class="section-sub">Each system is solving a fundamentally different problem. Same category, different buyer.</p>
+<!-- ① OVERVIEW -->
+<section id="overview">
+  <div class="section-header">
+    <div class="section-label">01 — Overview</div>
+    <h2>Three systems, three paradigms</h2>
+    <p>Same FL category — fundamentally different buyers and problems being solved.</p>
+  </div>
+
   <div class="grid-3">
-    <div class="card flower"><div class="accent"></div>
-      <span class="tag">COORDINATION SYSTEM</span>
+    <div class="card flower">
+      <div class="stripe"></div>
+      <span class="tag">Coordination System</span>
       <h3>Flower</h3>
-      <p>Dev-first FL framework. Make federated learning as easy as writing a normal ML script.</p>
+      <p>Dev-first FL framework. Federated learning as easy as writing a normal ML script.</p>
       <ul>
         <li><b>Optimizes for:</b> flexibility &amp; iteration</li>
-        <li><b>Trust:</b> assumed honest</li>
-        <li><b>Users:</b> ML teams, researchers</li>
+        <li><b>Trust model:</b> assumed honest</li>
+        <li><b>Primary users:</b> ML teams, researchers</li>
+        <li><b>Overhead:</b> minimal</li>
       </ul>
     </div>
-    <div class="card nvflare"><div class="accent"></div>
-      <span class="tag">ORCHESTRATION SYSTEM</span>
+    <div class="card nvflare">
+      <div class="stripe"></div>
+      <span class="tag">Orchestration System</span>
       <h3>NVFlare</h3>
       <p>Enterprise workflow engine for FL. Controlled, auditable, reproducible jobs across trusted institutions.</p>
       <ul>
         <li><b>Optimizes for:</b> stability &amp; governance</li>
-        <li><b>Trust:</b> institutionally enforced</li>
-        <li><b>Users:</b> enterprises, hospitals, banks</li>
+        <li><b>Trust model:</b> institutionally enforced</li>
+        <li><b>Primary users:</b> enterprises, hospitals, banks</li>
+        <li><b>Overhead:</b> high (PKI, ops)</li>
       </ul>
     </div>
-    <div class="card flock"><div class="accent"></div>
-      <span class="tag">ECONOMIC / INCENTIVE SYSTEM</span>
+    <div class="card flock">
+      <div class="stripe"></div>
+      <span class="tag">Economic / Incentive System</span>
       <h3>FLock</h3>
       <p>Decentralized, trustless FL network. Coordinate parties who don't trust each other via incentives &amp; attestation.</p>
       <ul>
         <li><b>Optimizes for:</b> trust &amp; sovereignty</li>
-        <li><b>Trust:</b> trustless / adversarial</li>
-        <li><b>Users:</b> governments, multi-sovereign networks</li>
+        <li><b>Trust model:</b> trustless / adversarial</li>
+        <li><b>Primary users:</b> governments, multi-sovereign nets</li>
+        <li><b>Overhead:</b> economic (ledger)</li>
       </ul>
     </div>
   </div>
 
-  <div class="positioning">
-    <div class="pos flower"><b>Flower is for…</b><p>ML teams adding federated learning to an existing stack with minimum friction.</p></div>
-    <div class="pos nvflare"><b>NVFlare is for…</b><p>Enterprises that need a controlled, auditable, production-grade FL orchestration platform.</p></div>
-    <div class="pos flock"><b>FLock is for…</b><p>Governments and multi-party networks that need sovereign, trustless, incentive-aligned AI across parties who don't trust each other.</p></div>
+  <div class="pos-row">
+    <div class="pos flower">
+      <b>Flower is for…</b>
+      <p>ML teams adding federated learning to an existing stack with minimum friction.</p>
+    </div>
+    <div class="pos nvflare">
+      <b>NVFlare is for…</b>
+      <p>Enterprises that need controlled, auditable, production-grade FL orchestration.</p>
+    </div>
+    <div class="pos flock">
+      <b>FLock is for…</b>
+      <p>Governments and multi-party networks that need sovereign, trustless, incentive-aligned AI across parties who don't trust each other.</p>
+    </div>
   </div>
 </section>
 
-<!-- RADAR -->
+<div class="divider"></div>
+
+<!-- ② ORIGINS -->
+<section id="origins">
+  <div class="section-header">
+    <div class="section-label">02 — Origins &amp; DNA</div>
+    <h2>Where each system came from</h2>
+    <p>History explains design. Flower and NVFlare carry the constraints of the environments they were born in — and that shapes every tradeoff you see in them today.</p>
+  </div>
+
+  <div class="origins-grid">
+
+    <div class="origin-card flower">
+      <div class="origin-header">
+        <div class="year-badge">Born 2020 · Oxford / Adap ML</div>
+        <h3>Flower</h3>
+        <div class="origin-tagline">An academic project that became the default FL research framework</div>
+      </div>
+      <div class="origin-body">
+        <div class="origin-section-title">Background</div>
+        <p>Flower was created by Daniel Beutel, Taner Topal, and colleagues at the University of Oxford, first published at MLSys 2020. The founding insight was simple: federated learning should feel exactly like writing a normal ML training script — no FL-specific boilerplate, no framework lock-in. The team was doing FL research across PyTorch, TensorFlow, and JAX simultaneously and needed one abstraction that worked everywhere.</p>
+        <p>It was later commercialized as Flower Labs / Adap ML, but the research-first DNA was already baked in. The open-source community grew fast because the barrier to entry was near zero.</p>
+        <div class="origin-section-title" style="margin-top:4px">Core DNA</div>
+        <div class="dna-pills">
+          <span class="dna-pill">Academic research origin</span>
+          <span class="dna-pill">Framework-agnostic by necessity</span>
+          <span class="dna-pill">MLSys community</span>
+          <span class="dna-pill">Speed of iteration</span>
+          <span class="dna-pill">Python-first</span>
+        </div>
+        <div class="implication-box">
+          <div class="imp-label">Why this shapes Flower's design today</div>
+          <ul>
+            <li>The <strong>Strategy pattern</strong> exists because researchers needed to swap FedAvg for FedProx, Krum, or a custom algorithm in one function — not rebuild a system</li>
+            <li><strong>NDArray parameter format</strong> (not PyTorch tensors) came from needing JAX, TF, and sklearn to interoperate on the same server</li>
+            <li>The <strong>Virtual Client Engine</strong> (simulating 1000 clients in-process) exists because academic benchmarks need scale without cloud bills</li>
+            <li><strong>No built-in security or governance</strong> — research environments assume honest parties. Adding PKI or audit logs would have slowed adoption and wasn't the point.</li>
+            <li>The <strong>large community</strong> and many integrations (HuggingFace, LightGBM, etc.) are a direct legacy of academic collaboration norms</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="origin-card nvflare">
+      <div class="origin-header">
+        <div class="year-badge">Born 2021 · NVIDIA Clara → NVFlare</div>
+        <h3>NVFlare</h3>
+        <div class="origin-tagline">Built for hospital consortia. Generalized into an enterprise FL platform.</div>
+      </div>
+      <div class="origin-body">
+        <div class="origin-section-title">Background</div>
+        <p>NVFlare grew out of NVIDIA's <strong>Clara Train</strong> platform — a healthcare AI toolkit built for medical imaging across hospital networks. The original problem was not "how do we make FL easy for developers" but "how do we run a compliant, auditable AI training job across 20 hospitals that each have legal, IT, and ethics review boards."</p>
+        <p>That meant every design decision was filtered through the question: <em>will a hospital CISO approve this?</em> Identity management, job isolation, reproducible runs, and site-level policy enforcement came first. Developer ergonomics came second. NVIDIA released NVFlare v2.0 in 2022 as a general-purpose platform, but the healthcare/enterprise DNA is irreversible.</p>
+        <div class="origin-section-title" style="margin-top:4px">Core DNA</div>
+        <div class="dna-pills">
+          <span class="dna-pill">Healthcare / NVIDIA Clara</span>
+          <span class="dna-pill">Hospital consortium ops</span>
+          <span class="dna-pill">Compliance-first design</span>
+          <span class="dna-pill">Enterprise IT mindset</span>
+          <span class="dna-pill">GPU hardware alignment</span>
+        </div>
+        <div class="implication-box">
+          <div class="imp-label">Why this shapes NVFlare's design today</div>
+          <ul>
+            <li>The <strong>PKI provisioning system</strong> (startup kits, per-site certificates) exists because hospitals cannot share a password — every node needs a cryptographic identity signed by an authority</li>
+            <li><strong>Job-based workflow</strong> (not interactive scripts) mirrors how hospital IT deploys anything: reviewed, versioned, logged, rollback-able</li>
+            <li><strong>Built-in DP and HE</strong> were required because medical data regulations (HIPAA, GDPR) demanded technical privacy guarantees, not just policy promises</li>
+            <li>The <strong>admin console and audit log</strong> exist because a hospital IRB needs to verify exactly what code ran on which data, when, and with what result</li>
+            <li><strong>Heavy infra overhead</strong> is a feature, not a bug — in regulated environments, complexity is the evidence of compliance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flock-born">
+    <div class="fb-icon">⛓</div>
+    <div>
+      <h4>FLock — born without legacy constraints</h4>
+      <p>Unlike Flower or NVFlare, FLock wasn't built to retrofit FL onto an existing workflow. It was designed from scratch for environments where parties <em>cannot</em> establish institutional trust — and where economic incentives are the only reliable coordination mechanism. The on-chain architecture isn't a bolt-on; it's the foundational assumption. That freedom from legacy means FLock can be the right fit for problems that neither Flower nor NVFlare can structurally address.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ③ RADAR + BARS -->
 <section id="radar">
-  <h2>Tradeoff Radar</h2>
-  <p class="section-sub">Higher = stronger on that dimension. No system wins on all axes — that's the point.</p>
+  <div class="section-header">
+    <div class="section-label">03 — Tradeoffs</div>
+    <h2>No system wins on all axes</h2>
+    <p>Each system dominates its intended use case. Overlap is the anti-pattern.</p>
+  </div>
+
   <div class="legend">
     <span><i class="dot flower"></i>Flower</span>
     <span><i class="dot nvflare"></i>NVFlare</span>
     <span><i class="dot flock"></i>FLock</span>
   </div>
-  <div class="chart-wrap"><canvas id="radar"></canvas></div>
-  <div class="chart-wrap">
-    <h3>Relative tradeoffs (high-level)</h3>
-    <canvas id="bars"></canvas>
+
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>Multi-dimensional comparison</h3>
+      <p class="sub">Higher = stronger on that dimension (0–10)</p>
+      <canvas id="radar"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Key differentiating axes</h3>
+      <p class="sub">Where each system leads</p>
+      <canvas id="bars"></canvas>
+    </div>
   </div>
 </section>
 
-<!-- SPECTRUM -->
+<div class="divider"></div>
+
+<!-- ③ SPECTRUM -->
 <section id="spectrum">
-  <h2>Efficiency ↔ Trust Spectrum</h2>
-  <p class="section-sub">The core tradeoff: the more trust you add, the more overhead you pay. Pick the point that matches your buyer.</p>
+  <div class="section-header">
+    <div class="section-label">04 — Efficiency ↔ Trust Spectrum</div>
+    <h2>The core tradeoff</h2>
+    <p>More trust = more overhead. Pick the point that matches your buyer's actual constraints.</p>
+  </div>
 
-  <div class="spectrum">
-    <h3>Efficiency (lower overhead →)</h3>
-    <div class="bar">
-      <div class="track"><div class="fill" style="width:100%"></div></div>
-      <div class="pin" style="left:12%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
-      <div class="pin" style="left:52%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
-      <div class="pin" style="left:88%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
-    </div>
-    <div class="ends"><span>Minimal coordination overhead</span><span>Infra overhead</span><span>Economic overhead</span></div>
+  <div class="spectrum-wrap">
 
-    <h3 style="margin-top:28px">Determinism (more predictable →)</h3>
-    <div class="bar">
-      <div class="track"><div class="fill" style="width:100%"></div></div>
-      <div class="pin" style="left:88%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
-      <div class="pin" style="left:62%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
-      <div class="pin" style="left:18%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    <div class="spectrum-row">
+      <div class="spectrum-label">
+        <span class="title">Efficiency</span>
+        <span class="ends"><span>Lower overhead →</span></span>
+      </div>
+      <div class="track">
+        <div class="track-fill" style="width:100%;background:linear-gradient(90deg,#E91E63,#00A896,#5C6BC0)"></div>
+      </div>
+      <div class="pins">
+        <div class="pin" style="left:12%">
+          <div class="pin-dot" style="background:var(--flower)"></div>
+          <span class="pin-label" style="color:var(--flower)">Flower</span>
+        </div>
+        <div class="pin" style="left:52%">
+          <div class="pin-dot" style="background:var(--nvflare)"></div>
+          <span class="pin-label" style="color:var(--nvflare)">NVFlare</span>
+        </div>
+        <div class="pin" style="left:88%">
+          <div class="pin-dot" style="background:var(--flock)"></div>
+          <span class="pin-label" style="color:var(--flock)">FLock</span>
+        </div>
+      </div>
+      <div class="spectrum-ends"><span>Minimal coordination overhead</span><span>Infra overhead</span><span>Economic overhead</span></div>
     </div>
-    <div class="ends"><span>Game-theoretic behavior</span><span>Coordination-based</span><span>Controlled execution</span></div>
 
-    <h3 style="margin-top:28px">Developer Experience (smoother →)</h3>
-    <div class="bar">
-      <div class="track"><div class="fill" style="width:100%"></div></div>
-      <div class="pin" style="left:88%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
-      <div class="pin" style="left:52%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
-      <div class="pin" style="left:14%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    <div class="spectrum-row">
+      <div class="spectrum-label">
+        <span class="title">Determinism</span>
+        <span class="ends"><span>More predictable →</span></span>
+      </div>
+      <div class="track">
+        <div class="track-fill" style="width:100%;background:linear-gradient(90deg,#5C6BC0,#E91E63,#00A896)"></div>
+      </div>
+      <div class="pins">
+        <div class="pin" style="left:18%">
+          <div class="pin-dot" style="background:var(--flock)"></div>
+          <span class="pin-label" style="color:var(--flock)">FLock</span>
+        </div>
+        <div class="pin" style="left:55%">
+          <div class="pin-dot" style="background:var(--flower)"></div>
+          <span class="pin-label" style="color:var(--flower)">Flower</span>
+        </div>
+        <div class="pin" style="left:88%">
+          <div class="pin-dot" style="background:var(--nvflare)"></div>
+          <span class="pin-label" style="color:var(--nvflare)">NVFlare</span>
+        </div>
+      </div>
+      <div class="spectrum-ends"><span>Game-theoretic behavior</span><span>Coordination-based</span><span>Controlled execution</span></div>
     </div>
-    <div class="ends"><span>Mechanism-design complexity</span><span>Infra-heavy workflow</span><span>Dev-first abstraction</span></div>
 
-    <h3 style="margin-top:28px">Trust Guarantees (stronger →)</h3>
-    <div class="bar">
-      <div class="track"><div class="fill" style="width:100%"></div></div>
-      <div class="pin" style="left:14%"><div class="marker" style="background:var(--flower)"></div>Flower</div>
-      <div class="pin" style="left:50%"><div class="marker" style="background:var(--nvflare)"></div>NVFlare</div>
-      <div class="pin" style="left:90%"><div class="marker" style="background:var(--flock)"></div>FLock</div>
+    <div class="spectrum-row">
+      <div class="spectrum-label">
+        <span class="title">Developer Experience</span>
+        <span class="ends"><span>Smoother →</span></span>
+      </div>
+      <div class="track">
+        <div class="track-fill" style="width:100%;background:linear-gradient(90deg,#5C6BC0,#00A896,#E91E63)"></div>
+      </div>
+      <div class="pins">
+        <div class="pin" style="left:14%">
+          <div class="pin-dot" style="background:var(--flock)"></div>
+          <span class="pin-label" style="color:var(--flock)">FLock</span>
+        </div>
+        <div class="pin" style="left:52%">
+          <div class="pin-dot" style="background:var(--nvflare)"></div>
+          <span class="pin-label" style="color:var(--nvflare)">NVFlare</span>
+        </div>
+        <div class="pin" style="left:88%">
+          <div class="pin-dot" style="background:var(--flower)"></div>
+          <span class="pin-label" style="color:var(--flower)">Flower</span>
+        </div>
+      </div>
+      <div class="spectrum-ends"><span>Mechanism-design complexity</span><span>Infra-heavy workflow</span><span>Dev-first abstraction</span></div>
     </div>
-    <div class="ends"><span>Assumed honest</span><span>Institutionally enforced</span><span>Trustless / adversarial</span></div>
+
+    <div class="spectrum-row">
+      <div class="spectrum-label">
+        <span class="title">Trust Guarantees</span>
+        <span class="ends"><span>Stronger →</span></span>
+      </div>
+      <div class="track">
+        <div class="track-fill" style="width:100%;background:linear-gradient(90deg,#E91E63,#00A896,#5C6BC0)"></div>
+      </div>
+      <div class="pins">
+        <div class="pin" style="left:14%">
+          <div class="pin-dot" style="background:var(--flower)"></div>
+          <span class="pin-label" style="color:var(--flower)">Flower</span>
+        </div>
+        <div class="pin" style="left:50%">
+          <div class="pin-dot" style="background:var(--nvflare)"></div>
+          <span class="pin-label" style="color:var(--nvflare)">NVFlare</span>
+        </div>
+        <div class="pin" style="left:88%">
+          <div class="pin-dot" style="background:var(--flock)"></div>
+          <span class="pin-label" style="color:var(--flock)">FLock</span>
+        </div>
+      </div>
+      <div class="spectrum-ends"><span>Assumed honest</span><span>Institutionally enforced</span><span>Trustless / adversarial</span></div>
+    </div>
+
   </div>
 </section>
 
-<!-- ARCHITECTURE -->
+<div class="divider"></div>
+
+<!-- ④ ARCHITECTURE -->
 <section id="arch">
-  <h2>Architecture at a Glance</h2>
-  <p class="section-sub">What each stack actually looks like. Hover the highlighted layer — that's where each system's "gravity" sits.</p>
-  <div class="arch">
-    <div class="stack">
-      <h4 style="color:var(--flower)">Flower</h4>
-      <div class="layer">Application / Model Code</div>
-      <div class="arrow">▲</div>
-      <div class="layer hl-flower">Strategy API (Python, framework-agnostic)</div>
-      <div class="arrow">▲</div>
-      <div class="layer">gRPC Client ↔ Server Messaging</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Local Training Runtime</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Raw Local Data</div>
+  <div class="section-header">
+    <div class="section-label">05 — Architecture</div>
+    <h2>Where each system's gravity sits</h2>
+    <p>The highlighted layer is where each product's core differentiation lives.</p>
+  </div>
+
+  <div class="arch-grid">
+
+    <div class="stack flower">
+      <div class="stack-header">
+        Flower
+        <span class="badge">Strategy Layer</span>
+      </div>
+      <div class="layers">
+        <div class="layer">Application / Model Code</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer hl">Strategy API (Python, framework-agnostic)</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">gRPC Client ↔ Server Messaging</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Local Training Runtime</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Raw Local Data</div>
+      </div>
     </div>
 
-    <div class="stack">
-      <h4 style="color:var(--nvflare)">NVFlare</h4>
-      <div class="layer">Admin Console / Dashboards</div>
-      <div class="arrow">▲</div>
-      <div class="layer hl-nvflare">Job &amp; Workflow Controller</div>
-      <div class="arrow">▲</div>
-      <div class="layer">PKI, RBAC, Provisioning</div>
-      <div class="arrow">▲</div>
-      <div class="layer">FL Clients (institutional nodes)</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Siloed Institutional Data</div>
+    <div class="stack nvflare">
+      <div class="stack-header">
+        NVFlare
+        <span class="badge">Orchestration Layer</span>
+      </div>
+      <div class="layers">
+        <div class="layer">Admin Console / Dashboards</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer hl">Job &amp; Workflow Controller</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">PKI, RBAC, Provisioning</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">FL Clients (institutional nodes)</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Siloed Institutional Data</div>
+      </div>
     </div>
 
-    <div class="stack">
-      <h4 style="color:var(--flock)">FLock</h4>
-      <div class="layer">Application / Sovereign AI Models</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Federated Training Layer (SecAgg + DP)</div>
-      <div class="arrow">▲</div>
-      <div class="layer hl-flock">Incentive &amp; Attestation Layer (on-chain)</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Trustless Node Network</div>
-      <div class="arrow">▲</div>
-      <div class="layer">Sovereign / Multi-Party Data</div>
+    <div class="stack flock">
+      <div class="stack-header">
+        FLock
+        <span class="badge">Incentive Layer</span>
+      </div>
+      <div class="layers">
+        <div class="layer">Application / Sovereign AI Models</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Federated Training (SecAgg + DP)</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer hl">Incentive &amp; Attestation (on-chain)</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Trustless Node Network</div>
+        <div class="layer-arrow">↑</div>
+        <div class="layer">Sovereign / Multi-Party Data</div>
+      </div>
     </div>
+
   </div>
 </section>
 
-<!-- FIT -->
+<div class="divider"></div>
+
+<!-- ⑤ FIT MAP -->
 <section id="fit">
-  <h2>Customer Fit Map</h2>
-  <p class="section-sub">Where each system wins on a buyer map. X: trust between parties (high → low). Y: ops maturity required.</p>
-  <div class="chart-wrap"><canvas id="scatter"></canvas></div>
-  <div class="grid-3" style="margin-top:20px">
-    <div class="card flower"><div class="accent"></div>
-      <h3>Ideal for</h3>
-      <ul><li>FL research &amp; prototyping</li><li>Cross-device FL</li><li>Startups iterating fast</li></ul>
+  <div class="section-header">
+    <div class="section-label">06 — Customer Fit</div>
+    <h2>Buyer map by trust &amp; ops maturity</h2>
+    <p>X: trust between parties (high → low). Y: ops maturity required. No two systems occupy the same quadrant.</p>
+  </div>
+
+  <div class="chart-box">
+    <canvas id="scatter" style="max-height:360px"></canvas>
+    <p class="quadrant-note">Bubble size represents relative ecosystem maturity</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card flower">
+      <div class="stripe"></div>
+      <span class="tag">Flower Wins</span>
+      <h3>Research &amp; Dev</h3>
+      <ul>
+        <li>FL research &amp; prototyping</li>
+        <li>Cross-device FL</li>
+        <li>Startups iterating fast</li>
+        <li>Academic benchmarking</li>
+      </ul>
     </div>
-    <div class="card nvflare"><div class="accent"></div>
-      <h3>Ideal for</h3>
-      <ul><li>Hospital &amp; bank consortia</li><li>Regulated cross-silo FL</li><li>Defense pilots</li></ul>
+    <div class="card nvflare">
+      <div class="stripe"></div>
+      <span class="tag">NVFlare Wins</span>
+      <h3>Enterprise Consortia</h3>
+      <ul>
+        <li>Hospital &amp; bank consortia</li>
+        <li>Regulated cross-silo FL</li>
+        <li>Defense pilots</li>
+        <li>Compliance-driven orgs</li>
+      </ul>
     </div>
-    <div class="card flock"><div class="accent"></div>
-      <h3>Ideal for</h3>
-      <ul><li>Multi-sovereign AI</li><li>Smart city / gov networks</li><li>Decentralized AI marketplaces</li></ul>
+    <div class="card flock">
+      <div class="stripe"></div>
+      <span class="tag">FLock Wins</span>
+      <h3>Sovereign Networks</h3>
+      <ul>
+        <li>Multi-sovereign AI</li>
+        <li>Smart city / gov networks</li>
+        <li>Decentralized AI marketplaces</li>
+        <li>Cross-jurisdiction data</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<!-- TABLE -->
+<div class="divider"></div>
+
+<!-- ⑥ TABLE -->
 <section id="table">
-  <h2>Full Comparison Table</h2>
-  <p class="section-sub">20-dimension BD reference. Click a tab above for visual views.</p>
-  <div style="overflow-x:auto">
+  <div class="section-header">
+    <div class="section-label">07 — Full Comparison</div>
+    <h2>20-dimension BD reference</h2>
+    <p>Deep-dive on every relevant axis for sales &amp; partnership conversations.</p>
+  </div>
+
+  <div class="table-wrap">
     <table id="compareTable"></table>
   </div>
 </section>
 
+<div class="divider"></div>
+
+<!-- ⑧ SWOT -->
+<section id="swot">
+  <div class="section-header">
+    <div class="section-label">08 — SWOT Analysis</div>
+    <h2>Strengths, weaknesses, opportunities, threats</h2>
+    <p>A structured view for partnership and competitive positioning conversations.</p>
+  </div>
+
+  <div class="swot-grid">
+
+    <!-- Flower SWOT -->
+    <div class="swot-card flower">
+      <div class="swot-card-header">
+        <div>
+          <h3>Flower</h3>
+          <div class="swot-sub">Coordination system · Research &amp; startup market</div>
+        </div>
+      </div>
+      <div class="swot-quads">
+        <div class="swot-quad s">
+          <div class="swot-q-label">S Strengths</div>
+          <ul>
+            <li>Lowest barrier to entry — zero FL-specific boilerplate</li>
+            <li>Truly framework-agnostic (PyTorch, JAX, TF, sklearn)</li>
+            <li>Largest open-source FL community</li>
+            <li>Virtual client engine for research simulation at scale</li>
+            <li>Pluggable strategy API — swap aggregator in one function</li>
+            <li>Fast iteration cycle; minimal infra dependency</li>
+          </ul>
+        </div>
+        <div class="swot-quad w">
+          <div class="swot-q-label">W Weaknesses</div>
+          <ul>
+            <li>No built-in security, DP, or audit trail</li>
+            <li>Not enterprise-ready out of the box</li>
+            <li>Assumes honest participants — breaks under adversarial conditions</li>
+            <li>No job scheduling, RBAC, or site policy enforcement</li>
+            <li>Fault tolerance must be hand-built by the user</li>
+          </ul>
+        </div>
+        <div class="swot-quad o">
+          <div class="swot-q-label">O Opportunities</div>
+          <ul>
+            <li>FL adoption growing in startups and mid-market</li>
+            <li>SuperLink cloud deployment path for managed FL</li>
+            <li>Integrations with HuggingFace, LLM fine-tuning wave</li>
+            <li>Bridge into enterprise via partner ecosystem</li>
+            <li>Growing demand for cross-device FL (mobile, IoT)</li>
+          </ul>
+        </div>
+        <div class="swot-quad t">
+          <div class="swot-q-label">T Threats</div>
+          <ul>
+            <li>NVFlare improving developer ergonomics — closing the gap</li>
+            <li>Enterprise buyers outgrow Flower and switch platforms</li>
+            <li>Commoditization — cloud providers bundle lightweight FL</li>
+            <li>Governance and compliance requirements increasing globally</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- NVFlare SWOT -->
+    <div class="swot-card nvflare">
+      <div class="swot-card-header">
+        <div>
+          <h3>NVFlare</h3>
+          <div class="swot-sub">Orchestration system · Enterprise &amp; regulated market</div>
+        </div>
+      </div>
+      <div class="swot-quads">
+        <div class="swot-quad s">
+          <div class="swot-q-label">S Strengths</div>
+          <ul>
+            <li>Production-grade: PKI, RBAC, audit log out of the box</li>
+            <li>Built-in DP (Gaussian/Laplace) and HE (CKKS/TenSEAL)</li>
+            <li>Job snapshot/restore — full reproducibility for compliance</li>
+            <li>NVIDIA hardware optimization — GPU-native performance</li>
+            <li>Proven in regulated industries (health, finance, defense)</li>
+            <li>Cross-silo validation and streaming aggregation</li>
+          </ul>
+        </div>
+        <div class="swot-quad w">
+          <div class="swot-q-label">W Weaknesses</div>
+          <ul>
+            <li>Heavy ops overhead — PKI provisioning, admin console, infra</li>
+            <li>Slow iteration; not suited for research or prototyping</li>
+            <li>Perceived as NVIDIA-tied — hesitation from non-NVIDIA shops</li>
+            <li>Steep learning curve; complex job configuration</li>
+            <li>No trustless or incentive layer — useless for adversarial parties</li>
+          </ul>
+        </div>
+        <div class="swot-quad o">
+          <div class="swot-q-label">O Opportunities</div>
+          <ul>
+            <li>AI compliance regulation (EU AI Act, HIPAA AI) expanding fast</li>
+            <li>Hospital, pharma, and financial consortia still underserved</li>
+            <li>Defense and intelligence FL programs growing</li>
+            <li>NVFlare v3.x simplification could reduce adoption friction</li>
+            <li>NVIDIA DGX infrastructure deeply embedded in enterprise</li>
+          </ul>
+        </div>
+        <div class="swot-quad t">
+          <div class="swot-q-label">T Threats</div>
+          <ul>
+            <li>Flower capturing lighter enterprise use cases as it matures</li>
+            <li>FLock addressing trustless cross-institution scenarios better</li>
+            <li>Cloud providers (AWS, Azure) launching managed FL with less friction</li>
+            <li>NVIDIA brand dependency could alienate multi-cloud buyers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLock SWOT -->
+    <div class="swot-card flock">
+      <div class="swot-card-header">
+        <div>
+          <h3>FLock</h3>
+          <div class="swot-sub">Incentive system · Sovereign &amp; trustless market</div>
+        </div>
+      </div>
+      <div class="swot-quads">
+        <div class="swot-quad s">
+          <div class="swot-q-label">S Strengths</div>
+          <ul>
+            <li>Only system that works when parties genuinely distrust each other</li>
+            <li>SecAgg native — server never sees raw gradients</li>
+            <li>On-chain attestation: immutable, auditable, no trusted coordinator</li>
+            <li>Built-in economic incentives align participants without contracts</li>
+            <li>Designed for cross-jurisdiction and multi-sovereign scenarios</li>
+            <li>No legacy constraints — architecturally clean for new problems</li>
+          </ul>
+        </div>
+        <div class="swot-quad w">
+          <div class="swot-q-label">W Weaknesses</div>
+          <ul>
+            <li>Early-stage maturity — smaller ecosystem and community</li>
+            <li>Economic overhead makes latency-critical use cases impractical</li>
+            <li>Mechanism design complexity — steep learning curve</li>
+            <li>Token-based model unfamiliar to traditional enterprise buyers</li>
+            <li>Validator scoring and slashing logic still maturing</li>
+          </ul>
+        </div>
+        <div class="swot-quad o">
+          <div class="swot-q-label">O Opportunities</div>
+          <ul>
+            <li>Government AI and cross-border data policy creating structural demand</li>
+            <li>Smart city and national AI infrastructure projects</li>
+            <li>Decentralized AI marketplace and data economy emerging</li>
+            <li>TEE / zkML attestation roadmap strengthens enterprise credibility</li>
+            <li>First-mover in a category neither Flower nor NVFlare can enter</li>
+          </ul>
+        </div>
+        <div class="swot-quad t">
+          <div class="swot-q-label">T Threats</div>
+          <ul>
+            <li>Enterprise blockchain skepticism — procurement friction</li>
+            <li>Regulatory uncertainty around tokenomics in some jurisdictions</li>
+            <li>NVFlare + legal contracts seen as "good enough" trustless alternative</li>
+            <li>Requires ecosystem buy-in — cold start problem for new networks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑦ UNDER THE HOOD -->
+<section id="hood">
+  <div class="section-header">
+    <div class="section-label">09 — Under the Hood</div>
+    <h2>Why they're differently wired</h2>
+    <p>For ML-background colleagues. The same "federated learning" label hides three completely different execution models — here's what's actually happening in each system.</p>
+  </div>
+
+  <!-- How a training round works -->
+  <div class="tech-section-bg">
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:6px">How a single training round executes</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px">The same conceptual "FL round" maps to very different control flows.</p>
+
+    <div class="round-flow">
+
+      <div class="flow-col flower">
+        <div class="flow-col-header">Flower</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Server samples clients</div>
+              <div class="step-note"><code>Strategy.configure_fit()</code> picks which <code>ClientProxy</code> objects participate</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Global weights pushed</div>
+              <div class="step-note">Parameters serialized as <code>NDArray</code> list — framework-agnostic, no model format assumed</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Client trains locally</div>
+              <div class="step-note"><code>client.fit()</code> runs N local epochs; returns updated weights + num_examples + custom metrics</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Strategy aggregates</div>
+              <div class="step-note"><code>aggregate_fit()</code> — pluggable: FedAvg, FedProx, FedOpt, Krum, custom. Pure Python function.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Evaluate (optional)</div>
+              <div class="step-note">Server- or client-side eval via <code>Strategy.evaluate()</code> or <code>configure_evaluate()</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-col nvflare">
+        <div class="flow-col-header">NVFlare</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Job submitted to server</div>
+              <div class="step-note">Admin deploys a <em>job</em> (config + app code). Controller validates it against site policies before execution.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Controller broadcasts task</div>
+              <div class="step-note"><code>Shareable</code> object (weights + metadata) sent via message bus to registered <code>Executor</code> sites</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Executor trains, filters apply</div>
+              <div class="step-note">Optional DP filter or HE plugin runs on the gradient before it leaves the site — site-enforced policy</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Aggregator collects</div>
+              <div class="step-note">Weighted FedAvg by default; custom aggregators pluggable via <code>Aggregator</code> component</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Audit log written</div>
+              <div class="step-note">Every task, result, and participation event is logged for reproducibility and compliance audit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-col flock">
+        <div class="flow-col-header">FLock</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Task posted on-chain</div>
+              <div class="step-note">Requester submits task + reward to smart contract. Participants stake tokens to join — skin in the game.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Nodes train, SecAgg masks gradients</div>
+              <div class="step-note">Secure aggregation protocol ensures server never sees raw gradients. Optional local DP noise added before masking.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Validators score updates</div>
+              <div class="step-note">Designated validator nodes evaluate model quality / detect poisoning. TEE or zkML attestation planned.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Attestation committed on-chain</div>
+              <div class="step-note">Aggregated result + validation proof written to ledger. Immutable, auditable, no trusted coordinator needed.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Rewards distributed / slashing</div>
+              <div class="step-note">Token rewards flow to honest contributors. Malicious nodes lose stake — Byzantine resistance through economics.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Communication topology -->
+  <div class="tech-section-bg">
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:6px">Communication topology</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Who talks to whom — and who holds the trust anchor.</p>
+
+    <div class="topology-row">
+      <div class="topo-box">
+        <div class="topo-title" style="color:var(--flower)">Flower — Star (server-centric)</div>
+        <svg class="topo-svg" viewBox="0 0 180 130">
+          <!-- center server -->
+          <circle cx="90" cy="55" r="18" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+          <text x="90" y="59" text-anchor="middle" font-size="10" font-weight="700" fill="#E91E63">Server</text>
+          <!-- clients -->
+          <circle cx="30"  cy="110" r="13" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <circle cx="75"  cy="115" r="13" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <circle cx="120" cy="115" r="13" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <circle cx="158" cy="95"  r="13" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <circle cx="22"  cy="72"  r="13" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <!-- spokes -->
+          <line x1="90" y1="73" x2="30"  y2="97"  stroke="#E91E63" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="90" y1="73" x2="75"  y2="102" stroke="#E91E63" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="90" y1="73" x2="120" y2="102" stroke="#E91E63" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="90" y1="73" x2="148" y2="88"  stroke="#E91E63" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="90" y1="55" x2="35"  y2="67"  stroke="#E91E63" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <text x="90" y="108" text-anchor="middle" font-size="9" fill="#aaa">clients</text>
+        </svg>
+        <div class="topo-caption">All client–server comms go through a single <strong>gRPC server</strong>. Clients never talk to each other. Server is the trust anchor.</div>
+      </div>
+
+      <div class="topo-box">
+        <div class="topo-title" style="color:var(--nvflare)">NVFlare — Hub & Spoke (admin-controlled)</div>
+        <svg class="topo-svg" viewBox="0 0 180 130">
+          <!-- FL server -->
+          <rect x="62" y="10" width="56" height="30" rx="7" fill="#E0F5F3" stroke="#00A896" stroke-width="2"/>
+          <text x="90" y="29" text-anchor="middle" font-size="10" font-weight="700" fill="#00A896">FL Server</text>
+          <!-- admin console -->
+          <rect x="4" y="10" width="48" height="26" rx="6" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <text x="28" y="27" text-anchor="middle" font-size="9" fill="#666">Admin</text>
+          <line x1="52" y1="23" x2="62" y2="23" stroke="#999" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <!-- sites -->
+          <rect x="20"  y="88" width="44" height="26" rx="6" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <text x="42"  y="105" text-anchor="middle" font-size="9" fill="#555">Site A</text>
+          <rect x="68"  y="88" width="44" height="26" rx="6" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <text x="90"  y="105" text-anchor="middle" font-size="9" fill="#555">Site B</text>
+          <rect x="116" y="88" width="44" height="26" rx="6" fill="#F8F9FB" stroke="#ccc" stroke-width="1.5"/>
+          <text x="138" y="105" text-anchor="middle" font-size="9" fill="#555">Site C</text>
+          <!-- lines -->
+          <line x1="73"  y1="40" x2="42"  y2="88" stroke="#00A896" stroke-width="1.5" opacity=".7"/>
+          <line x1="90"  y1="40" x2="90"  y2="88" stroke="#00A896" stroke-width="1.5" opacity=".7"/>
+          <line x1="107" y1="40" x2="138" y2="88" stroke="#00A896" stroke-width="1.5" opacity=".7"/>
+          <text x="90" y="127" text-anchor="middle" font-size="9" fill="#aaa">PKI-authenticated sites</text>
+        </svg>
+        <div class="topo-caption">Institutions connect to a central FL server with <strong>PKI certs</strong> provisioned per site. Admin console controls job scheduling from outside the data plane.</div>
+      </div>
+
+      <div class="topo-box">
+        <div class="topo-title" style="color:var(--flock)">FLock — Mesh + On-chain Anchor</div>
+        <svg class="topo-svg" viewBox="0 0 180 130">
+          <!-- chain -->
+          <rect x="55" y="4" width="70" height="24" rx="6" fill="#EDE7F6" stroke="#5C6BC0" stroke-width="2"/>
+          <text x="90" y="20" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5C6BC0">On-chain Ledger</text>
+          <!-- nodes -->
+          <circle cx="35"  cy="75" r="14" fill="#F8F9FB" stroke="#5C6BC0" stroke-width="1.5"/>
+          <text x="35"  y="79" text-anchor="middle" font-size="8.5" fill="#5C6BC0">Node</text>
+          <circle cx="90"  cy="90" r="14" fill="#F8F9FB" stroke="#5C6BC0" stroke-width="1.5"/>
+          <text x="90"  y="94" text-anchor="middle" font-size="8.5" fill="#5C6BC0">Node</text>
+          <circle cx="145" cy="75" r="14" fill="#F8F9FB" stroke="#5C6BC0" stroke-width="1.5"/>
+          <text x="145" y="79" text-anchor="middle" font-size="8.5" fill="#5C6BC0">Node</text>
+          <!-- validator -->
+          <circle cx="90"  cy="48" r="13" fill="#EDE7F6" stroke="#5C6BC0" stroke-width="2"/>
+          <text x="90"  y="45" text-anchor="middle" font-size="7.5" font-weight="700" fill="#5C6BC0">Vali-</text>
+          <text x="90"  y="54" text-anchor="middle" font-size="7.5" font-weight="700" fill="#5C6BC0">dator</text>
+          <!-- mesh edges -->
+          <line x1="35"  y1="75" x2="90"  y2="90"  stroke="#5C6BC0" stroke-width="1.2" opacity=".5"/>
+          <line x1="90"  y1="90" x2="145" y2="75"  stroke="#5C6BC0" stroke-width="1.2" opacity=".5"/>
+          <line x1="35"  y1="75" x2="145" y2="75"  stroke="#5C6BC0" stroke-width="1.2" opacity=".5"/>
+          <!-- to validator -->
+          <line x1="35"  y1="63" x2="80"  y2="52"  stroke="#5C6BC0" stroke-width="1.2" stroke-dasharray="3,2" opacity=".7"/>
+          <line x1="90"  y1="76" x2="90"  y2="61"  stroke="#5C6BC0" stroke-width="1.2" stroke-dasharray="3,2" opacity=".7"/>
+          <line x1="145" y1="63" x2="100" y2="52"  stroke="#5C6BC0" stroke-width="1.2" stroke-dasharray="3,2" opacity=".7"/>
+          <!-- to chain -->
+          <line x1="90" y1="35" x2="90" y2="28" stroke="#5C6BC0" stroke-width="1.5" opacity=".8"/>
+          <text x="90" y="122" text-anchor="middle" font-size="9" fill="#aaa">SecAgg between peers</text>
+        </svg>
+        <div class="topo-caption">Nodes communicate peer-to-peer with <strong>SecAgg masking</strong>. Validators score updates, results committed on-chain. No trusted coordinator node.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key technical internals -->
+  <div class="tech-section-bg">
+    <h3 style="font-size:16px;font-weight:800;margin-bottom:6px">Key technical internals</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px">The core abstractions you'd touch as an ML engineer.</p>
+
+    <div class="tech-intro">
+      <div class="tech-card flower">
+        <div class="tc-label">Flower</div>
+        <h4>Strategy-pattern core</h4>
+        <div class="tech-kv">
+          <div class="kv"><span class="k">Primary abstraction</span><span class="v"><code>Strategy</code> class — override <code>aggregate_fit</code>, <code>aggregate_evaluate</code>, <code>configure_fit</code></span></div>
+          <div class="kv"><span class="k">Model format</span><span class="v"><code>List[np.ndarray]</code> — fully framework-agnostic. PyTorch, JAX, TF, sklearn all work identically.</span></div>
+          <div class="kv"><span class="k">Built-in aggregators</span><span class="v">FedAvg, FedProx, FedOpt, FedMedian, FedTrimmedAvg, Krum, FedXGBBagging</span></div>
+          <div class="kv"><span class="k">Privacy primitives</span><span class="v">None built-in. DP and SecAgg available as experimental plugins; community-provided.</span></div>
+          <div class="kv"><span class="k">Simulation</span><span class="v">Virtual Client Engine runs thousands of simulated clients in-process — great for research benchmarks</span></div>
+          <div class="kv"><span class="k">Fault tolerance</span><span class="v">Reconnect handling; no built-in checkpointing — implement in Strategy</span></div>
+        </div>
+      </div>
+
+      <div class="tech-card nvflare">
+        <div class="tc-label">NVFlare</div>
+        <h4>Controller–Executor pipeline</h4>
+        <div class="tech-kv">
+          <div class="kv"><span class="k">Primary abstraction</span><span class="v"><code>Controller</code> (server-side logic) + <code>Executor</code> (site-side compute) — decoupled via <code>Shareable</code> objects</span></div>
+          <div class="kv"><span class="k">Model format</span><span class="v">Framework-agnostic via <code>Shareable</code> dict; first-class PyTorch/TF support through <code>ModelLearner</code> base class</span></div>
+          <div class="kv"><span class="k">Built-in aggregators</span><span class="v">InTimeAccumulateWeightedAggregator (streaming), DXO-based FedAvg, cross-site validation</span></div>
+          <div class="kv"><span class="k">Privacy primitives</span><span class="v"><strong>Built-in DP filter</strong> (Gaussian/Laplace), <strong>HE support</strong> (CKKS via TenSEAL). Applied as site-enforced filter chain.</span></div>
+          <div class="kv"><span class="k">Reproducibility</span><span class="v">Full job snapshot/restore, seed control, audit log. Designed for regulated environments.</span></div>
+          <div class="kv"><span class="k">Fault tolerance</span><span class="v">Job-level retry, site dropout handling, checkpoint-resume</span></div>
+        </div>
+      </div>
+
+      <div class="tech-card flock">
+        <div class="tc-label">FLock</div>
+        <h4>Incentive-anchored execution</h4>
+        <div class="tech-kv">
+          <div class="kv"><span class="k">Primary abstraction</span><span class="v">Smart contract task lifecycle — stake → train → validate → attest → reward. No central Python API.</span></div>
+          <div class="kv"><span class="k">Model format</span><span class="v">Task-defined. Gradient updates masked via SecAgg before any node aggregates them.</span></div>
+          <div class="kv"><span class="k">Aggregation</span><span class="v">Decentralized — no single aggregation server. Validator quorum scores updates; result committed to ledger.</span></div>
+          <div class="kv"><span class="k">Privacy primitives</span><span class="v"><strong>SecAgg native</strong> — server-side never sees raw gradients. Local DP composable on top. TEE / zkML attestation roadmap.</span></div>
+          <div class="kv"><span class="k">Byzantine resistance</span><span class="v">Economic: malicious nodes lose staked tokens (slashing). Validator scoring detects poisoned updates.</span></div>
+          <div class="kv"><span class="k">Fault tolerance</span><span class="v">Economic dropout penalty; tasks re-posted if quorum not reached within window</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy primitives comparison -->
+  <div class="privacy-table-wrap">
+    <table>
+      <thead><tr>
+        <th>Privacy / Security Primitive</th>
+        <th class="flower">Flower</th>
+        <th class="nvflare">NVFlare</th>
+        <th class="flock">FLock</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Differential Privacy (DP)</td><td><span class="badge-opt">Plugin / manual</span></td><td><span class="badge-yes">Built-in filter</span></td><td><span class="badge-opt">Composable</span></td></tr>
+        <tr><td>Secure Aggregation (SecAgg)</td><td><span class="badge-opt">Experimental</span></td><td><span class="badge-no">Not included</span></td><td><span class="badge-native">Native / core</span></td></tr>
+        <tr><td>Homomorphic Encryption (HE)</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">CKKS via TenSEAL</span></td><td><span class="badge-no">Not included</span></td></tr>
+        <tr><td>PKI / identity management</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">Full (per-site certs)</span></td><td><span class="badge-native">On-chain (wallet keys)</span></td></tr>
+        <tr><td>Byzantine fault tolerance</td><td><span class="badge-opt">Strategy-level (Krum etc.)</span></td><td><span class="badge-opt">Partial (validator)</span></td><td><span class="badge-native">Economic (slashing)</span></td></tr>
+        <tr><td>Audit / reproducibility log</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">Full job audit log</span></td><td><span class="badge-native">On-chain immutable</span></td></tr>
+        <tr><td>Model poisoning defense</td><td><span class="badge-opt">Robust aggregators</span></td><td><span class="badge-opt">Validator + DP filters</span></td><td><span class="badge-native">Validator scoring + slash</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
 </main>
 
-<footer>FLock × Internal BD • Interactive Infographic • v1</footer>
+<footer>FLock × Internal BD &nbsp;·&nbsp; Interactive Infographic &nbsp;·&nbsp; v2</footer>
 
 <script>
-// Tabs
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById(t.dataset.tab).classList.add('active');
-  });
-});
+const C = { flower:'#E91E63', nvflare:'#00A896', flock:'#5C6BC0' };
+const alpha = (hex, a) => {
+  const n = parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+};
 
-// Colors
-const C = {flower:'#E91E63', nvflare:'#00B8A9', flock:'#6C5CE7'};
-const alpha = (hex,a)=>{const n=parseInt(hex.slice(1),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`};
+Chart.defaults.color = '#6B7280';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
+Chart.defaults.font.size = 12;
+Chart.defaults.borderColor = '#E2E5EF';
 
-Chart.defaults.color = '#9AA3BE';
-Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, Arial';
-Chart.defaults.borderColor = '#2A3352';
-
-// Radar
+// ── Radar ──
 new Chart(document.getElementById('radar'), {
-  type:'radar',
-  data:{
-    labels:['Efficiency','Determinism','Developer Experience','Trust Guarantees','Enterprise Ops','Incentive Alignment','Scalability Across Orgs'],
-    datasets:[
-      {label:'Flower', data:[9,7,9,2,3,1,6], borderColor:C.flower, backgroundColor:alpha(C.flower,.18), pointBackgroundColor:C.flower},
-      {label:'NVFlare',data:[6,9,6,6,9,3,5], borderColor:C.nvflare,backgroundColor:alpha(C.nvflare,.18),pointBackgroundColor:C.nvflare},
-      {label:'FLock',  data:[4,5,4,9,6,9,9], borderColor:C.flock,  backgroundColor:alpha(C.flock,.18),  pointBackgroundColor:C.flock},
+  type: 'radar',
+  data: {
+    labels: [
+      'Efficiency',
+      'Determinism',
+      'Dev Experience',
+      'Trust Guarantees',
+      'Enterprise Ops',
+      'Incentive Alignment',
+      'Cross-Org Scale'
+    ],
+    datasets: [
+      { label:'Flower',  data:[9,7,9,2,3,1,6], borderColor:C.flower,  backgroundColor:alpha(C.flower,.1),  pointBackgroundColor:C.flower,  pointRadius:4, borderWidth:2 },
+      { label:'NVFlare', data:[6,9,6,6,9,3,5], borderColor:C.nvflare, backgroundColor:alpha(C.nvflare,.1), pointBackgroundColor:C.nvflare, pointRadius:4, borderWidth:2 },
+      { label:'FLock',   data:[4,5,4,9,6,9,9], borderColor:C.flock,   backgroundColor:alpha(C.flock,.1),   pointBackgroundColor:C.flock,   pointRadius:4, borderWidth:2 },
     ]
   },
-  options:{
-    plugins:{legend:{position:'bottom'}},
-    scales:{r:{min:0,max:10,angleLines:{color:'#2A3352'},grid:{color:'#2A3352'},pointLabels:{color:'#E9ECF5',font:{size:12}},ticks:{display:false}}}
-  }
-});
-
-// Bars
-new Chart(document.getElementById('bars'), {
-  type:'bar',
-  data:{
-    labels:['Efficiency','Determinism','Developer Experience'],
-    datasets:[
-      {label:'Flower', data:[9,7,9], backgroundColor:C.flower},
-      {label:'NVFlare',data:[6,9,6], backgroundColor:C.nvflare},
-      {label:'FLock',  data:[4,5,4], backgroundColor:C.flock},
-    ]
-  },
-  options:{
-    plugins:{legend:{position:'bottom'}},
-    scales:{y:{beginAtZero:true,max:10,grid:{color:'#2A3352'}},x:{grid:{display:false}}}
-  }
-});
-
-// Scatter / fit map
-new Chart(document.getElementById('scatter'),{
-  type:'scatter',
-  data:{datasets:[
-    {label:'Flower', data:[{x:9,y:2}], backgroundColor:C.flower, pointRadius:18, pointHoverRadius:22},
-    {label:'NVFlare',data:[{x:6,y:9}], backgroundColor:C.nvflare,pointRadius:18, pointHoverRadius:22},
-    {label:'FLock',  data:[{x:1.5,y:7}], backgroundColor:C.flock, pointRadius:18, pointHoverRadius:22},
-  ]},
-  options:{
-    plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:(c)=>`${c.dataset.label} — trust:${c.parsed.x}/10, ops:${c.parsed.y}/10`}}},
-    scales:{
-      x:{title:{display:true,text:'Trust between parties (high → low)'},min:0,max:10,reverse:true,grid:{color:'#2A3352'}},
-      y:{title:{display:true,text:'Ops maturity required'},min:0,max:10,grid:{color:'#2A3352'}}
+  options: {
+    plugins: { legend: { position:'bottom', labels:{ padding:20, usePointStyle:true } } },
+    scales: {
+      r: {
+        min: 0, max: 10,
+        angleLines: { color:'#E2E5EF' },
+        grid: { color:'#E2E5EF' },
+        pointLabels: { color:'#1A1D2E', font:{ size:12, weight:'600' } },
+        ticks: { display:false, stepSize:2 }
+      }
     }
   }
 });
 
-// Table
+// ── Bars ──
+new Chart(document.getElementById('bars'), {
+  type: 'bar',
+  data: {
+    labels: ['Efficiency','Determinism','Dev Experience','Trust','Enterprise Ops','Incentive'],
+    datasets: [
+      { label:'Flower',  data:[9,7,9,2,3,1], backgroundColor:alpha(C.flower,.85),  borderRadius:4, borderSkipped:false },
+      { label:'NVFlare', data:[6,9,6,6,9,3], backgroundColor:alpha(C.nvflare,.85), borderRadius:4, borderSkipped:false },
+      { label:'FLock',   data:[4,5,4,9,6,9], backgroundColor:alpha(C.flock,.85),   borderRadius:4, borderSkipped:false },
+    ]
+  },
+  options: {
+    plugins: { legend: { position:'bottom', labels:{ padding:20, usePointStyle:true } } },
+    scales: {
+      y: { beginAtZero:true, max:10, grid:{ color:'#F0F1F5' }, ticks:{ stepSize:2 } },
+      x: { grid:{ display:false } }
+    }
+  }
+});
+
+// ── Scatter / fit map ──
+new Chart(document.getElementById('scatter'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label:'Flower — Research & Startups',
+        data:[{x:8.5,y:2.5}],
+        backgroundColor:alpha(C.flower,.9),
+        pointRadius:22, pointHoverRadius:26,
+        pointStyle:'circle'
+      },
+      {
+        label:'NVFlare — Enterprise Consortia',
+        data:[{x:5.5,y:8.5}],
+        backgroundColor:alpha(C.nvflare,.9),
+        pointRadius:22, pointHoverRadius:26
+      },
+      {
+        label:'FLock — Sovereign / Gov Networks',
+        data:[{x:1.5,y:6.5}],
+        backgroundColor:alpha(C.flock,.9),
+        pointRadius:22, pointHoverRadius:26
+      }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { position:'bottom', labels:{ padding:20, usePointStyle:true } },
+      tooltip: { callbacks:{ label: c => `${c.dataset.label}` } }
+    },
+    scales: {
+      x: {
+        title: { display:true, text:'Trust between parties  (low ← → high)', font:{ weight:'600' } },
+        min:0, max:10, reverse:true,
+        grid:{ color:'#F0F1F5' }
+      },
+      y: {
+        title: { display:true, text:'Ops maturity required', font:{ weight:'600' } },
+        min:0, max:10,
+        grid:{ color:'#F0F1F5' }
+      }
+    }
+  }
+});
+
+// ── Comparison table ──
 const rows = [
   ['System Paradigm','Coordination system','Orchestration system','Economic / incentive system'],
   ['Core Philosophy','FL as easy as normal ML code','Controlled, auditable jobs across institutions','Trustless, sovereign FL with incentives'],
@@ -371,20 +1652,43 @@ const rows = [
   ['Scalability','Horizontal; bottleneck at aggregation','Within institutional footprint','Across orgs & jurisdictions'],
   ['Efficiency','Highest — lean runtime','Moderate — infra overhead','Lowest raw — economic overhead'],
   ['Determinism','High','Highest','Lower (game-theoretic)'],
-  ['Security Model','None built-in beyond TLS','Infra-based (PKI, RBAC, DP/HE)','Crypto-economic (attestation, slashing)'],
+  ['Security Model','None beyond TLS','Infra-based (PKI, RBAC, DP/HE)','Crypto-economic (attestation, slashing)'],
   ['Incentives','None','External (contracts)','Built-in tokenomics'],
   ['Developer Experience','Best — Pythonic, fast','Moderate — infra-heavy','Steepest — mechanism design'],
   ['Deployment Maturity','Early–mid production','Enterprise production','Experimental–early production'],
   ['Typical Users','ML teams, researchers','Enterprises, hospitals, banks','Govs, sovereign networks, Web3 AI'],
   ['Ideal Use Cases','Prototyping, research, cross-device','Cross-silo FL in regulated consortia','Multi-sovereign, adversarial, incentive-driven'],
   ['Anti-Use Cases','Adversarial or regulated enterprise','Fast research iteration; trustless nets','Simple trusted internal FL; latency-critical'],
-  ['Strengths','Simple • framework-agnostic • community','Enterprise ops • reproducibility • governance','Trustless • sovereign • built-in incentives'],
-  ['Weaknesses','No security/governance/incentives','Heavy ops • slow iteration','Complex • less mature • overhead'],
+  ['Strengths','Simple · framework-agnostic · community','Enterprise ops · reproducibility · governance','Trustless · sovereign · built-in incentives'],
+  ['Weaknesses','No security/governance/incentives','Heavy ops · slow iteration','Complex · less mature · overhead'],
 ];
+
 const t = document.getElementById('compareTable');
-t.innerHTML = `<thead><tr><th>Dimension</th><th style="color:${C.flower}">Flower</th><th style="color:${C.nvflare}">NVFlare</th><th style="color:${C.flock}">FLock</th></tr></thead><tbody>${
-  rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')
-}</tbody>`;
+t.innerHTML = `
+<thead><tr>
+  <th>Dimension</th>
+  <th class="flower">Flower</th>
+  <th class="nvflare">NVFlare</th>
+  <th class="flock">FLock</th>
+</tr></thead>
+<tbody>
+${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}
+</tbody>`;
+
+// ── Nav active highlight on scroll ──
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#'+e.target.id ? '#1A1D2E' : '';
+        a.style.borderBottomColor = a.getAttribute('href') === '#'+e.target.id ? '#5C6BC0' : '';
+      });
+    }
+  });
+}, { rootMargin:'-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
 </script>
 </body>
 </html>
