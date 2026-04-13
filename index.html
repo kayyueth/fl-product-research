@@ -722,7 +722,7 @@
             <li>The <strong>Strategy pattern</strong> exists because researchers needed to swap FedAvg for FedProx, Krum, or a custom algorithm in one function — not rebuild a system</li>
             <li><strong>NDArray parameter format</strong> (not PyTorch tensors) came from needing JAX, TF, and sklearn to interoperate on the same server</li>
             <li>The <strong>Virtual Client Engine</strong> (simulating 1000 clients in-process) exists because academic benchmarks need scale without cloud bills</li>
-            <li><strong>No built-in security or governance</strong> — research environments assume honest parties. Adding PKI or audit logs would have slowed adoption and wasn't the point.</li>
+            <li><strong>Security was not the original focus</strong> — the core design assumed honest research collaborators. Modern Flower deployments now include TLS, SuperNode authentication, and OIDC, but these were additions layered on top of a research-first core, not foundational constraints the way they are in NVFlare.</li>
             <li>The <strong>large community</strong> and many integrations (HuggingFace, LightGBM, etc.) are a direct legacy of academic collaboration norms</li>
           </ul>
         </div>
@@ -738,7 +738,7 @@
       <div class="origin-body">
         <div class="origin-section-title">Background</div>
         <p>NVFlare grew out of NVIDIA's <strong>Clara Train</strong> platform — a healthcare AI toolkit built for medical imaging across hospital networks. The original problem was not "how do we make FL easy for developers" but "how do we run a compliant, auditable AI training job across 20 hospitals that each have legal, IT, and ethics review boards."</p>
-        <p>That meant every design decision was filtered through the question: <em>will a hospital CISO approve this?</em> Identity management, job isolation, reproducible runs, and site-level policy enforcement came first. Developer ergonomics came second. NVIDIA released NVFlare v2.0 in 2022 as a general-purpose platform, but the healthcare/enterprise DNA is irreversible.</p>
+        <p>That meant every design decision was filtered through the question: <em>will a hospital CISO approve this?</em> Identity management, job isolation, reproducible runs, and site-level policy enforcement came first. Developer ergonomics came second. NVIDIA released NVFlare v2.0 in 2022 and now explicitly positions it as a general-purpose collaborative computing framework — not a healthcare-only tool. The Clara roots shaped the defaults and priorities, but the platform has genuinely broadened.</p>
         <div class="origin-section-title" style="margin-top:4px">Core DNA</div>
         <div class="dna-pills">
           <span class="dna-pill">Healthcare / NVIDIA Clara</span>
@@ -1087,11 +1087,11 @@
         <div class="swot-quad w">
           <div class="swot-q-label">W Weaknesses</div>
           <ul>
-            <li>No built-in security, DP, or audit trail</li>
-            <li>Not enterprise-ready out of the box</li>
-            <li>Assumes honest participants — breaks under adversarial conditions</li>
+            <li>Security, DP, and audit features exist (TLS, OIDC, SuperLink event log, DP guide) but are newer additions — not the original core design</li>
+            <li>Not enterprise-ready out of the box; less compliance-centric than NVFlare overall</li>
+            <li>Not designed first for hostile multi-party settings; robust aggregators (Krum, Bulyan, FedTrimmedAvg) provide some Byzantine resilience but it is not a trustless system</li>
             <li>No job scheduling, RBAC, or site policy enforcement</li>
-            <li>Fault tolerance must be hand-built by the user</li>
+            <li>Lighter on fault tolerance than NVFlare; FaultTolerantFedAvg and SuperLink state persistence exist but are less comprehensive</li>
           </ul>
         </div>
         <div class="swot-quad o">
@@ -1129,9 +1129,9 @@
           <div class="swot-q-label">S Strengths</div>
           <ul>
             <li>Production-grade: PKI, RBAC, audit log out of the box</li>
-            <li>Built-in DP (Gaussian/Laplace) and HE (CKKS/TenSEAL)</li>
+            <li>Built-in DP filters (SVTPrivacy, PercentilePrivacy, and others) and configurable HE support via TenSEAL</li>
             <li>Job snapshot/restore — full reproducibility for compliance</li>
-            <li>NVIDIA hardware optimization — GPU-native performance</li>
+            <li>Fits naturally in NVIDIA-heavy environments; the orchestration framework itself is hardware-agnostic and does not require GPUs</li>
             <li>Proven in regulated industries (health, finance, defense)</li>
             <li>Cross-silo validation and streaming aggregation</li>
           </ul>
@@ -1254,7 +1254,7 @@
             <div class="step-num">2</div>
             <div class="step-body">
               <div class="step-title">Global weights pushed</div>
-              <div class="step-note">Parameters serialized as <code>NDArray</code> list — framework-agnostic, no model format assumed</div>
+              <div class="step-note">Model updates serialized as <code>ArrayRecord</code> inside a <code>Message</code> — framework-agnostic. (Older Flower versions used bare NDArray lists; current docs center the Message/ArrayRecord abstraction.)</div>
             </div>
           </div>
           <div class="flow-step">
@@ -1466,11 +1466,11 @@
         <h4>Strategy-pattern core</h4>
         <div class="tech-kv">
           <div class="kv"><span class="k">Primary abstraction</span><span class="v"><code>Strategy</code> class — override <code>aggregate_fit</code>, <code>aggregate_evaluate</code>, <code>configure_fit</code></span></div>
-          <div class="kv"><span class="k">Model format</span><span class="v"><code>List[np.ndarray]</code> — fully framework-agnostic. PyTorch, JAX, TF, sklearn all work identically.</span></div>
+          <div class="kv"><span class="k">Model format</span><span class="v"><code>ArrayRecord</code> inside a <code>Message</code> — framework-agnostic. Older versions used bare <code>List[np.ndarray]</code>; current docs center the Message/ArrayRecord abstraction.</span></div>
           <div class="kv"><span class="k">Built-in aggregators</span><span class="v">FedAvg, FedProx, FedOpt, FedMedian, FedTrimmedAvg, Krum, FedXGBBagging</span></div>
-          <div class="kv"><span class="k">Privacy primitives</span><span class="v">None built-in. DP and SecAgg available as experimental plugins; community-provided.</span></div>
+          <div class="kv"><span class="k">Privacy primitives</span><span class="v">SecAgg and SecAgg+ supported with dedicated workflows. First-party DP support exists (marked production preview). TLS, SuperNode auth, and OIDC available in deployment runtime.</span></div>
           <div class="kv"><span class="k">Simulation</span><span class="v">Virtual Client Engine runs thousands of simulated clients in-process — great for research benchmarks</span></div>
-          <div class="kv"><span class="k">Fault tolerance</span><span class="v">Reconnect handling; no built-in checkpointing — implement in Strategy</span></div>
+          <div class="kv"><span class="k">Fault tolerance</span><span class="v">FaultTolerantFedAvg strategy built-in; SuperLink state can be persisted. Lighter on ops tooling than NVFlare, but not build-from-scratch.</span></div>
         </div>
       </div>
 
@@ -1481,7 +1481,7 @@
           <div class="kv"><span class="k">Primary abstraction</span><span class="v"><code>Controller</code> (server-side logic) + <code>Executor</code> (site-side compute) — decoupled via <code>Shareable</code> objects</span></div>
           <div class="kv"><span class="k">Model format</span><span class="v">Framework-agnostic via <code>Shareable</code> dict; first-class PyTorch/TF support through <code>ModelLearner</code> base class</span></div>
           <div class="kv"><span class="k">Built-in aggregators</span><span class="v">InTimeAccumulateWeightedAggregator (streaming), DXO-based FedAvg, cross-site validation</span></div>
-          <div class="kv"><span class="k">Privacy primitives</span><span class="v"><strong>Built-in DP filter</strong> (Gaussian/Laplace), <strong>HE support</strong> (CKKS via TenSEAL). Applied as site-enforced filter chain.</span></div>
+          <div class="kv"><span class="k">Privacy primitives</span><span class="v"><strong>Built-in DP filters</strong> (SVTPrivacy, PercentilePrivacy, and others) and <strong>configurable HE support</strong> via TenSEAL. Applied as a site-enforced filter chain.</span></div>
           <div class="kv"><span class="k">Reproducibility</span><span class="v">Full job snapshot/restore, seed control, audit log. Designed for regulated environments.</span></div>
           <div class="kv"><span class="k">Fault tolerance</span><span class="v">Job-level retry, site dropout handling, checkpoint-resume</span></div>
         </div>
@@ -1512,12 +1512,12 @@
         <th class="flock">FLock</th>
       </tr></thead>
       <tbody>
-        <tr><td>Differential Privacy (DP)</td><td><span class="badge-opt">Plugin / manual</span></td><td><span class="badge-yes">Built-in filter</span></td><td><span class="badge-opt">Composable</span></td></tr>
-        <tr><td>Secure Aggregation (SecAgg)</td><td><span class="badge-opt">Experimental</span></td><td><span class="badge-no">Not included</span></td><td><span class="badge-native">Native / core</span></td></tr>
-        <tr><td>Homomorphic Encryption (HE)</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">CKKS via TenSEAL</span></td><td><span class="badge-no">Not included</span></td></tr>
-        <tr><td>PKI / identity management</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">Full (per-site certs)</span></td><td><span class="badge-native">On-chain (wallet keys)</span></td></tr>
-        <tr><td>Byzantine fault tolerance</td><td><span class="badge-opt">Strategy-level (Krum etc.)</span></td><td><span class="badge-opt">Partial (validator)</span></td><td><span class="badge-native">Economic (slashing)</span></td></tr>
-        <tr><td>Audit / reproducibility log</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">Full job audit log</span></td><td><span class="badge-native">On-chain immutable</span></td></tr>
+        <tr><td>Differential Privacy (DP)</td><td><span class="badge-opt">Built-in (production preview)</span></td><td><span class="badge-yes">Built-in filters</span></td><td><span class="badge-opt">Composable</span></td></tr>
+        <tr><td>Secure Aggregation (SecAgg)</td><td><span class="badge-yes">Supported (SecAgg+)</span></td><td><span class="badge-no">Not included</span></td><td><span class="badge-native">Native / core</span></td></tr>
+        <tr><td>Homomorphic Encryption (HE)</td><td><span class="badge-no">Not included</span></td><td><span class="badge-yes">Configurable (TenSEAL)</span></td><td><span class="badge-no">Not included</span></td></tr>
+        <tr><td>PKI / identity management</td><td><span class="badge-opt">Available (SuperNode auth, OIDC)</span></td><td><span class="badge-yes">Full (per-site certs)</span></td><td><span class="badge-native">On-chain (wallet keys)</span></td></tr>
+        <tr><td>Byzantine fault tolerance</td><td><span class="badge-opt">Strategy-level (Krum, Bulyan etc.)</span></td><td><span class="badge-opt">Partial (validator)</span></td><td><span class="badge-native">Economic (slashing)</span></td></tr>
+        <tr><td>Audit / reproducibility log</td><td><span class="badge-opt">Available (SuperLink event log)</span></td><td><span class="badge-yes">Full job audit log</span></td><td><span class="badge-native">On-chain immutable</span></td></tr>
         <tr><td>Model poisoning defense</td><td><span class="badge-opt">Robust aggregators</span></td><td><span class="badge-opt">Validator + DP filters</span></td><td><span class="badge-native">Validator scoring + slash</span></td></tr>
       </tbody>
     </table>
