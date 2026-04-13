@@ -467,6 +467,135 @@
   .swot-quad.o ul li::before { background: #2563EB; }
   .swot-quad.t ul li::before { background: #D97706; }
 
+  /* ─── MARKET INTELLIGENCE ─── */
+  .mi-thesis {
+    background: linear-gradient(135deg, #F0F1FA 0%, #E8EEF6 100%);
+    border: 1px solid #D0D5E8;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+  .mi-thesis blockquote {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 500;
+    margin: 0;
+    padding-left: 20px;
+    border-left: 4px solid var(--flock);
+  }
+  .mi-thesis .thesis-source {
+    margin-top: 14px;
+    padding-left: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mi-sub { margin-bottom: 36px; }
+  .mi-sub h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; letter-spacing: -.3px; }
+  .mi-sub > p { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+  .mi-analysis { font-size: 13.5px; color: var(--text); line-height: 1.7; margin-top: 18px; padding: 18px 20px; background: var(--surface); border-radius: 12px; border-left: 3px solid var(--border); }
+  .mi-analysis strong { font-weight: 700; }
+
+  /* Metric bars */
+  .metric-rows { display: flex; flex-direction: column; gap: 14px; }
+  .metric-row { display: grid; grid-template-columns: 140px 1fr 1fr; gap: 12px; align-items: center; }
+  @media(max-width:700px) { .metric-row { grid-template-columns: 100px 1fr 1fr; } }
+  .metric-label { font-size: 12px; font-weight: 700; color: var(--text); text-align: right; }
+  .metric-bar-wrap { position: relative; height: 28px; background: var(--surface); border-radius: 6px; overflow: hidden; }
+  .metric-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; font-weight: 700; color: #fff; min-width: 36px; transition: width .6s ease; }
+  .metric-bar.flower-bar { background: var(--flower); }
+  .metric-bar.nvflare-bar { background: var(--nvflare); }
+  .metric-note { font-size: 10.5px; color: var(--muted); text-align: right; margin-top: 2px; }
+
+  /* Ecosystem shape */
+  .eco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width:900px) { .eco-grid { grid-template-columns: 1fr; } }
+  .eco-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .eco-box-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .eco-box-header h4 { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
+  .eco-box-header p { font-size: 12px; color: var(--muted); margin: 0; }
+  .eco-box.flower .eco-box-header { border-top: 4px solid var(--flower); }
+  .eco-box.nvflare .eco-box-header { border-top: 4px solid var(--nvflare); }
+  .eco-box-body { padding: 16px 20px; }
+  .eco-box-body .eco-section { margin-bottom: 14px; }
+  .eco-box-body .eco-section:last-child { margin-bottom: 0; }
+  .eco-box-body .eco-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 6px; }
+  .eco-box-body .eco-section p { font-size: 12.5px; color: var(--text); line-height: 1.6; margin: 0; }
+  .eco-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .eco-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+
+  /* Adoption sectors */
+  .adopt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width:900px) { .adopt-grid { grid-template-columns: 1fr; } }
+  .adopt-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .adopt-box.flower { border-top: 3px solid var(--flower); }
+  .adopt-box.nvflare { border-top: 3px solid var(--nvflare); }
+  .adopt-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 800; }
+  .adopt-box.flower .adopt-header { color: var(--flower); }
+  .adopt-box.nvflare .adopt-header { color: var(--nvflare); }
+  .adopt-sector { padding: 12px 18px; border-bottom: 1px solid var(--border); }
+  .adopt-sector:last-child { border-bottom: none; }
+  .adopt-sector .sector-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 5px; }
+  .adopt-sector .orgs { font-size: 12.5px; color: var(--text); line-height: 1.55; }
+
+  /* Convergence diagram */
+  .converge-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+  }
+  .converge-svg { max-width: 640px; width: 100%; margin: 0 auto; display: block; }
+  .converge-caption { font-size: 13px; color: var(--muted); margin-top: 16px; line-height: 1.6; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  /* Selection framework */
+  .select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:900px) { .select-grid { grid-template-columns: 1fr; } }
+  .select-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .select-card.flower { border-top: 4px solid var(--flower); }
+  .select-card.nvflare { border-top: 4px solid var(--nvflare); }
+  .select-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+  .select-card.flower h4 { color: var(--flower); }
+  .select-card.nvflare h4 { color: var(--nvflare); }
+  .select-card .select-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .select-card ul { padding-left: 16px; font-size: 12.5px; color: var(--text); line-height: 1.65; }
+  .select-note {
+    background: linear-gradient(135deg, #FFF8E1, #FFF3E0);
+    border: 1px solid #FFE0B2;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-top: 20px;
+  }
+  .select-note .note-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #E65100; margin-bottom: 6px; }
+  .select-note p { font-size: 13px; color: var(--text); line-height: 1.6; margin: 0; }
+
+  /* Community chart box override */
+  .mi-chart-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+  .mi-chart-wrap h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mi-chart-wrap .sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
   /* ─── UNDER THE HOOD ─── */
   .tech-section-bg {
     background: #F5F6FA;
@@ -618,6 +747,7 @@
   <a href="#fit">Customer Fit</a>
   <a href="#table">Comparison</a>
   <a href="#swot">SWOT</a>
+  <a href="#intel">Flower vs NVFlare</a>
   <a href="#hood">Under the Hood</a>
 </nav>
 
@@ -1225,10 +1355,341 @@
 
 <div class="divider"></div>
 
-<!-- ⑦ UNDER THE HOOD -->
+<!-- ⑨ MARKET INTELLIGENCE: FLOWER vs NVFLARE -->
+<section id="intel">
+  <div class="section-header">
+    <div class="section-label">09 — Market Intelligence: Flower vs NVFlare</div>
+    <h2>Competitive landscape deep-dive</h2>
+    <p>Synthesized from three independent research reports (April 2026). Factually reconciled for internal strategic use.</p>
+  </div>
+
+  <!-- Thesis -->
+  <div class="mi-thesis">
+    <blockquote>
+      Flower and NVIDIA FLARE represent two converging but distinct poles of the federated learning stack. Flower leads in community adoption, research experimentation, and developer-first extensibility — and is actively expanding into enterprise deployment. NVFlare leads in production-grade operational tooling, enterprise security posture, and visibility in regulated consortium deployments. Their 2024 runtime integration signals an emerging <strong>research-to-production pipeline</strong> rather than purely zero-sum competition. They compete at the framework layer while becoming increasingly complementary in production architecture.
+    </blockquote>
+    <div class="thesis-source">Synthesized from: Compass research report, Deep Research analysis, Ecosystem comparative study — all sourced April 2026</div>
+  </div>
+
+  <!-- ── COMMUNITY & DEVELOPER MINDSHARE ── -->
+  <div class="mi-sub">
+    <h3>Community &amp; developer mindshare</h3>
+    <p>By every publicly measurable community indicator, Flower holds substantially greater developer mindshare. This reflects its research-first origin and bottom-up adoption model — individual researchers and small teams adopting the framework, contributing back, and citing the foundational paper. NVFlare's smaller public footprint reflects a top-down, enterprise-driven adoption model where the value accrues in production deployments rather than GitHub stars.</p>
+
+    <div class="metric-rows">
+      <div class="metric-row">
+        <div class="metric-label">GitHub Stars</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">~6,800</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:13.5%">~920</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Forks</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">~1,200</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:20.6%">~247</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Contributors</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">170+</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:38.8%">~66</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Total Commits</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">~4,945</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:54.9%">~2,716</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Paper Citations</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">~995</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:5%">~50</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Releases</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:39.8%">45</div></div>
+        <div class="metric-bar-wrap"><div class="metric-bar nvflare-bar" style="width:100%">113</div></div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-label">Dependent Projects</div>
+        <div class="metric-bar-wrap"><div class="metric-bar flower-bar" style="width:100%">2,500+</div></div>
+        <div class="metric-bar-wrap" style="opacity:.5"><div class="metric-bar nvflare-bar" style="width:30%;opacity:.5">N/A</div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:right">Source: GitHub repository data, Semantic Scholar, PyPI — retrieved April 13, 2026</div>
+
+    <div class="mi-analysis">
+      <strong>Reading the numbers carefully:</strong> Flower's ~8&times; star advantage and ~20&times; citation lead reflect genuine community scale — but Flower's two-year head start and academic origin partly explain the citation gap. NVFlare's higher release count (113 vs 45) reflects a release engineering posture that bakes changes through multiple release candidates, suggesting stronger stability guarantees per release. NVFlare's commit volume per contributor is notably higher, consistent with its core-maintainer-driven development model. Flower ships approximately monthly; NVFlare follows a 2–3 major releases per year cadence.
+    </div>
+
+    <div class="mi-chart-wrap">
+      <h4>Framework assessment scores</h4>
+      <div class="sub">2024 Springer comparative study of 15 FL frameworks (peer-reviewed benchmark)</div>
+      <div class="metric-rows">
+        <div class="metric-row">
+          <div class="metric-label">Flower</div>
+          <div class="metric-bar-wrap" style="grid-column:span 2"><div class="metric-bar flower-bar" style="width:84.75%">84.75% — #1 of 15</div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">NVFlare</div>
+          <div class="metric-bar-wrap" style="grid-column:span 2"><div class="metric-bar nvflare-bar" style="width:80.5%">80.5% — #2 of 15</div></div>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:10px">The study noted Flower scored higher on breadth (framework support, FL paradigm coverage) while NVFlare scored higher on convergence stability and operational tooling. A separate medical imaging benchmark found NVFlare achieved fastest and most stable convergence with greater computational demand, while Flower achieved comparable final accuracy with lower communication overhead.</div>
+    </div>
+  </div>
+
+  <!-- ── ECOSYSTEM SHAPE ── -->
+  <div class="mi-sub">
+    <h3>Two ecosystem "shapes"</h3>
+    <p>Flower and NVFlare are converging on fundamentally different ecosystem architectures. Understanding this distinction is more important than comparing raw feature lists.</p>
+
+    <div class="eco-grid">
+      <div class="eco-box flower">
+        <div class="eco-box-header">
+          <h4 style="color:var(--flower)">Flower — App ecosystem model</h4>
+          <p>"Discover, publish, and run federated apps across environments"</p>
+        </div>
+        <div class="eco-box-body">
+          <div class="eco-section">
+            <div class="eco-section-label">Platform components</div>
+            <p><strong>Flower Hub</strong> — marketplace for reusable FL apps (community-published). <strong>Flower SuperGrid</strong> (preview Sept 2025) — enterprise-grade federation management with confidential computing. <strong>Flower Intelligence</strong> — on-device AI with optional confidential remote compute. <strong>FlowerLLM</strong> — federated pre-training of 1B–7B parameter models on distributed GPUs.</p>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">ML framework support (15+)</div>
+            <div class="eco-tags">
+              <span class="eco-tag">PyTorch</span>
+              <span class="eco-tag">TensorFlow</span>
+              <span class="eco-tag">JAX</span>
+              <span class="eco-tag">HuggingFace</span>
+              <span class="eco-tag">scikit-learn</span>
+              <span class="eco-tag">XGBoost</span>
+              <span class="eco-tag">MONAI</span>
+              <span class="eco-tag">MLX</span>
+              <span class="eco-tag">fastai</span>
+              <span class="eco-tag">CatBoost</span>
+              <span class="eco-tag">LeRobot</span>
+              <span class="eco-tag">NumPy</span>
+              <span class="eco-tag">Pandas</span>
+            </div>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">Device reach</div>
+            <p>iOS, Android, Raspberry Pi, NVIDIA Jetson, C++ edge, plus standard cloud/server — broadest cross-device FL coverage of any framework.</p>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">Community infrastructure</div>
+            <p>Slack (3,100+ developers), Flower Discuss forum, DeepLearning.AI courses, CLI scaffolding (<code>flwr new</code>), multi-language docs (EN/FR/ZH/KO). Annual Flower AI Summit (4th year, London + satellite events at Stanford &amp; MIT).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="eco-box nvflare">
+        <div class="eco-box-header">
+          <h4 style="color:var(--nvflare)">NVFlare — Platform operator model</h4>
+          <p>"Secure provisioning, operational tooling, and production deployment infrastructure"</p>
+        </div>
+        <div class="eco-box-body">
+          <div class="eco-section">
+            <div class="eco-section-label">Operations tooling</div>
+            <p><strong>Web Dashboard</strong> for provisioning and monitoring. <strong>Admin Console</strong> for job orchestration. <strong>Resource Manager</strong> for multi-job scheduling. <strong>Overseer</strong> for high-availability server failover. TensorBoard / MLflow / W&amp;B streaming for experiment tracking. SSL certificate-based secure provisioning.</p>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">NVIDIA stack integration</div>
+            <div class="eco-tags">
+              <span class="eco-tag">Clara (Healthcare)</span>
+              <span class="eco-tag">MONAI (Medical Imaging)</span>
+              <span class="eco-tag">NeMo (LLM fine-tuning)</span>
+              <span class="eco-tag">BioNeMo (Drug Discovery)</span>
+              <span class="eco-tag">ExecuTorch (Mobile)</span>
+              <span class="eco-tag">Holoscan</span>
+            </div>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">Cloud deployment</div>
+            <p>One-line CLI deployment to AWS and Azure with infrastructure-as-code. Kubernetes/EKS/Helm-based workflows. Simulation → POC → Production progression path.</p>
+          </div>
+          <div class="eco-section">
+            <div class="eco-section-label">Community infrastructure</div>
+            <p>GitHub Discussions, NVIDIA Developer Forums, 12-chapter self-paced training (100+ notebooks, 80 videos), two NVIDIA DLI courses. Annual NVIDIA FLARE Day (2nd year) + technical webinar series.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mi-analysis">
+      <strong>The structural difference:</strong> Flower is building toward an application marketplace — a hub-and-spoke model where third-party developers publish reusable FL apps, and the value accrues from network effects. NVFlare is building toward a platform operator toolkit — the value accrues from operational control, security infrastructure, and depth of integration with NVIDIA's hardware and software ecosystem. Both approaches are legitimate but serve different buyer motivations.
+    </div>
+  </div>
+
+  <!-- ── ENTERPRISE ADOPTION ── -->
+  <div class="mi-sub">
+    <h3>Enterprise adoption landscape</h3>
+    <p>Publicly disclosed adopters, ecosystem participants, and reference deployments. These represent visible adoption signals — actual production footprint at each organization varies and is not fully disclosed publicly.</p>
+
+    <div class="adopt-grid">
+      <div class="adopt-box flower">
+        <div class="adopt-header">Flower — publicly disclosed adopters</div>
+        <div class="adopt-sector">
+          <div class="sector-label">Finance</div>
+          <div class="orgs">J.P. Morgan, Banking Circle, Temenos (deployed Flower Enterprise for decentralized banking use cases)</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Technology</div>
+          <div class="orgs">Samsung, Nokia Bell Labs, Sony AI, Mozilla (Brave, 50M+ users), Bosch Research, Databricks</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Healthcare</div>
+          <div class="orgs">NHS (UK), Siemens Healthcare, Owkin (FedECA survival analysis), Eye2Gene</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Consulting / Integrators</div>
+          <div class="orgs">Accenture, Red Hat (Kubernetes-based FL partnership)</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Academia</div>
+          <div class="orgs">Cambridge, Oxford, MIT, Stanford, Harvard, TU Munich, Univ. of Bologna — de facto standard FL research framework</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Web3 / Decentralized AI</div>
+          <div class="orgs">Vana (COLLECTIVE-1, billed as first decentralized user-owned foundation model)</div>
+        </div>
+      </div>
+      <div class="adopt-box nvflare">
+        <div class="adopt-header">NVFlare — publicly disclosed adopters</div>
+        <div class="adopt-sector">
+          <div class="sector-label">Healthcare Consortia</div>
+          <div class="orgs">EXAM study (20 hospitals, 5 continents — Nature Medicine 2021, AUC >0.92). Cancer AI Alliance (CAIA). ACR AI-LAB (planned distribution to tens of thousands of radiologist members). Roche, Rhino Health (20+ orgs), OPTIMA (EU precision oncology)</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Pharma / Life Sciences</div>
+          <div class="orgs">FAITE Consortium (AbbVie, Amgen, AstraZeneca, J&amp;J, UCB)</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Global Finance</div>
+          <div class="orgs">Swift (13 global banks incl. ANZ, BNY Mellon, Intesa Sanpaolo — federated anti-fraud), Royal Bank of Canada</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Government / National Security</div>
+          <div class="orgs">Taiwan Ministry of Health &amp; Welfare (MOHW), NNSA National Security Laboratories</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">National Labs</div>
+          <div class="orgs">Oak Ridge (ORNL), Sandia, Los Alamos, Lawrence Livermore</div>
+        </div>
+        <div class="adopt-sector">
+          <div class="sector-label">Consulting / Integrators</div>
+          <div class="orgs">Deloitte (using FLARE + MONAI + BioNeMo for client engagements)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mi-analysis">
+      <strong>Pattern:</strong> Flower's adoption is broad and horizontal — spanning tech, finance, automotive, and academia, driven by developer-level adoption and community effects. NVFlare's adoption is deep and vertical — concentrated in healthcare consortia, national security, and regulated finance, driven by institutional procurement and NVIDIA's existing enterprise relationships. Both claim Fortune 500 customers, but the visible proof points tell different stories: Flower demonstrates breadth of ecosystem participation; NVFlare demonstrates depth of production deployment in high-stakes settings. The EXAM study (Nature Medicine, 20 hospitals, 5 continents) remains the single most impactful published proof point in all of federated learning.
+    </div>
+  </div>
+
+  <!-- ── CONVERGENCE: FLOWER-ON-FLARE ── -->
+  <div class="mi-sub">
+    <h3>The convergence story: Flower-on-FLARE integration</h3>
+    <p>In 2024, both teams formally announced a runtime integration that allows Flower applications to run natively on the NVFlare runtime. This is the most structurally significant development in the FL framework landscape.</p>
+
+    <div class="converge-wrap">
+      <svg class="converge-svg" viewBox="0 0 640 220">
+        <!-- Flower side -->
+        <rect x="20" y="30" width="200" height="160" rx="14" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+        <text x="120" y="58" text-anchor="middle" font-size="14" font-weight="800" fill="#E91E63">Flower</text>
+        <text x="120" y="76" text-anchor="middle" font-size="10" fill="#999">"Development Interface"</text>
+        <rect x="40" y="90" width="160" height="28" rx="6" fill="#fff" stroke="#E91E63" stroke-width="1"/>
+        <text x="120" y="109" text-anchor="middle" font-size="10.5" fill="#E91E63">Strategy API + ClientApp</text>
+        <rect x="40" y="126" width="160" height="28" rx="6" fill="#fff" stroke="#E91E63" stroke-width="1"/>
+        <text x="120" y="145" text-anchor="middle" font-size="10.5" fill="#E91E63">Message / ArrayRecord</text>
+        <rect x="40" y="162" width="160" height="20" rx="5" fill="#FCE4EC" stroke="#ddd" stroke-width="1"/>
+        <text x="120" y="176" text-anchor="middle" font-size="9" fill="#999">Researcher / ML Engineer</text>
+
+        <!-- Arrow -->
+        <line x1="230" y1="110" x2="290" y2="110" stroke="#888" stroke-width="2" stroke-dasharray="6,3"/>
+        <polygon points="290,105 300,110 290,115" fill="#888"/>
+        <text x="265" y="98" text-anchor="middle" font-size="9" fill="#888">gRPC</text>
+        <text x="265" y="130" text-anchor="middle" font-size="9" fill="#888">no code</text>
+        <text x="265" y="141" text-anchor="middle" font-size="9" fill="#888">changes</text>
+
+        <!-- FLARE side -->
+        <rect x="310" y="30" width="310" height="160" rx="14" fill="#E0F5F3" stroke="#00A896" stroke-width="2"/>
+        <text x="465" y="58" text-anchor="middle" font-size="14" font-weight="800" fill="#00A896">NVIDIA FLARE Runtime</text>
+        <text x="465" y="76" text-anchor="middle" font-size="10" fill="#999">"Operational Runtime"</text>
+
+        <!-- LGS -->
+        <rect x="325" y="90" width="100" height="52" rx="6" fill="#fff" stroke="#00A896" stroke-width="1.5"/>
+        <text x="375" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#00A896">Local gRPC</text>
+        <text x="375" y="125" text-anchor="middle" font-size="10" font-weight="700" fill="#00A896">Server (LGS)</text>
+
+        <!-- FLARE engine -->
+        <rect x="440" y="90" width="165" height="52" rx="6" fill="#fff" stroke="#00A896" stroke-width="1.5"/>
+        <text x="522" y="108" text-anchor="middle" font-size="10" font-weight="700" fill="#00A896">FLARE Runtime</text>
+        <text x="522" y="122" text-anchor="middle" font-size="9" fill="#666">Multi-job scheduling</text>
+        <text x="522" y="134" text-anchor="middle" font-size="9" fill="#666">PKI + HA + Monitoring</text>
+
+        <line x1="425" y1="116" x2="440" y2="116" stroke="#00A896" stroke-width="1.5"/>
+        <polygon points="437,112 442,116 437,120" fill="#00A896"/>
+
+        <rect x="325" y="152" width="280" height="30" rx="6" fill="#E0F5F3" stroke="#ccc" stroke-width="1"/>
+        <text x="465" y="172" text-anchor="middle" font-size="9.5" fill="#666">Confidential Computing · P2P · Secure Provisioning · Audit</text>
+
+        <!-- Bottom label -->
+        <text x="320" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#444">Research-to-production pipeline — not zero-sum competition</text>
+      </svg>
+      <div class="converge-caption">
+        Flower clients redirect their gRPC endpoint to a Local gRPC Server within each NVFlare client. Messages are then routed through the FLARE runtime, inheriting its communication hardening, multi-job scheduling, confidential computing, and P2P capabilities — all without modifying Flower application code. This effectively partitions the stack: Flower becomes the standard development interface; NVFlare becomes the standard operational runtime.
+      </div>
+    </div>
+
+    <div class="mi-analysis">
+      <strong>Strategic implication for FLock:</strong> This integration suggests both teams recognize that their greatest competitive threat comes not from each other but from organizations choosing not to adopt federated learning at all. For FLock, the convergence creates a clear opportunity to position as the <em>third layer</em> — the incentive and trust infrastructure that neither Flower nor NVFlare provides — rather than competing with either on framework ergonomics or enterprise ops. The research-to-production pipeline becomes a research-to-production-to-sovereign pipeline when FLock's trustless coordination layer is added.
+    </div>
+  </div>
+
+  <!-- ── SELECTION FRAMEWORK ── -->
+  <div class="mi-sub">
+    <h3>Strategic selection framework</h3>
+    <p>When to recommend each system — based on buyer profile, not feature comparison.</p>
+
+    <div class="select-grid">
+      <div class="select-card flower">
+        <h4>Choose Flower when…</h4>
+        <div class="select-sub">Community-first, developer-first, breadth-first</div>
+        <ul>
+          <li>The team needs fast onboarding and rapid experimentation across multiple ML frameworks</li>
+          <li>The use case involves cross-device FL (mobile, IoT, edge) or non-standard FL paradigms — Flower's architecture appears more adaptable to vertical FL and novel configurations</li>
+          <li>Community ecosystem, third-party integrations, and academic citation are important (Flower is the default FL research platform)</li>
+          <li>The organization wants commercial vendor support via Flower Enterprise / Flower Labs</li>
+          <li>The deployment target is a growing "app ecosystem" model — discoverable, reusable federated applications</li>
+        </ul>
+      </div>
+      <div class="select-card nvflare">
+        <h4>Choose NVFlare when…</h4>
+        <div class="select-sub">Enterprise-first, security-first, depth-first</div>
+        <ul>
+          <li>The deployment requires production-grade security infrastructure (PKI provisioning, TLS, RBAC, audit logging, confidential computing)</li>
+          <li>The use case is in regulated healthcare, finance, or national security — where institutional compliance posture is a prerequisite</li>
+          <li>The organization is already invested in the NVIDIA ecosystem (DGX, Clara, NeMo, MONAI)</li>
+          <li>Multi-job scheduling, HA failover, and operational dashboards are needed for production stability</li>
+          <li>The priority is convergence speed and runtime stability over communication efficiency</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="select-note">
+      <div class="note-label">Key nuance for BD conversations</div>
+      <p>These are not mutually exclusive. The Flower-on-FLARE integration means an organization can prototype on Flower, deploy on NVFlare, and — for multi-sovereign or trustless scenarios — layer FLock's incentive infrastructure on top. The question is not "which one?" but "which combination, in what sequence, for which buyer?" The FL market is projected to grow from ~$150M (2024) to $300M–500M by the early 2030s — there is room for all three approaches to thrive in complementary niches.</p>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑩ UNDER THE HOOD -->
 <section id="hood">
   <div class="section-header">
-    <div class="section-label">09 — Under the Hood</div>
+    <div class="section-label">10 — Under the Hood</div>
     <h2>Why they're differently wired</h2>
     <p>For ML-background colleagues. The same "federated learning" label hides three completely different execution models — here's what's actually happening in each system.</p>
   </div>
